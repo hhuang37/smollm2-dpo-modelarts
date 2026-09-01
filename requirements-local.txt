@@ -1,0 +1,16 @@
+# 本地开发环境（数据构造 notebook / chat.py 对话验收 / OBS 上传下载脚本）。
+# 训练容器内的依赖看 docker/requirements.txt——两处版本 pin 保持一致。
+# 用法：python -m venv .venv && .venv\Scripts\pip install -r requirements-local.txt
+
+# torch CPU 版从 pytorch 官方 CPU 源装（PyPI 没有 +cpu 构建；extra-index 供依赖回落）
+--extra-index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+torch==2.13.0+cpu
+
+# 与镜像内完全一致的训练依赖
+-r docker/requirements.txt
+
+# 本地工具链
+python-dotenv
+jupyterlab
+huaweicloudsdkobs
