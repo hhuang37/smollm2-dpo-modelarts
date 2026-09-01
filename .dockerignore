@@ -1,0 +1,5 @@
+# 构建上下文只需要 docker/requirements.txt（Dockerfile 只 COPY 它）。
+# 其余全部排除——上下文越小构建越快，也防大文件意外进镜像。
+*
+!docker/
+!docker/requirements.txt

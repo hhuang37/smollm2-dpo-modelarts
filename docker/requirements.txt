@@ -1,0 +1,7 @@
+# torch==2.13.0+cpu 单独从 https://download.pytorch.org/whl/cpu 安装（见 Dockerfile，PyPI 无 +cpu 构建）
+# 全部 pin 到本地 venv 实测通过的精确版本（2026-08-28），兑现"本地验证过的原样上云"
+transformers==4.57.6
+trl==0.19.1
+datasets==3.6.0
+accelerate==1.14.0
+psutil   # banner 打印容器内存信息（8GB 规格排查 OOM 用）
