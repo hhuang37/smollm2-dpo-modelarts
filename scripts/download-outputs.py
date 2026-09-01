@@ -13,7 +13,7 @@ resp._stream.content——不是旧版的双参数姿势。
 import argparse
 import re
 import time
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -64,9 +64,11 @@ def main():
     print(f"obs://{bucket}/{prefix} 下 {len(files)} 个文件 -> {dest_root}")
 
     t_all = time.time()
+    # 本地落盘 = <dest>/<前缀末段>/<run_id>/...（取前缀末段而非整段，避免 outputs\outputs\ 双层）
+    local_root = dest_root / PurePosixPath(prefix.rstrip("/")).name
     for k in files:
         rel = k[len(prefix):]                       # 形如 <run_id>/eval_dpo.json
-        dest = dest_root / prefix.rstrip("/") / rel
+        dest = local_root / rel
         dest.parent.mkdir(parents=True, exist_ok=True)
         t0 = time.time()
         resp = obs.get_object(GetObjectRequest(bucket_name=bucket, object_key=k))
