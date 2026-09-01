@@ -200,8 +200,9 @@ New-Item -Force -ItemType Directory staging\code-dir\src, `
 Copy-Item run_train.sh staging\code-dir\
 Copy-Item src\train_dpo.py, src\common.py, src\upload_outputs.py staging\code-dir\src\
 
-# ② 基模 5 文件
-Copy-Item models\SmolLM2-135M-Instruct\* staging\code-dir\resources\model\ -Recurse
+# ② 基模 5 文件（注意拷的是**目录本身**——MODEL_PATH 指向 .../model/SmolLM2-135M-Instruct，
+#    多打一个 \* 把内容摊平到 model/ 下，云端会因找不到 config.json 秒退）
+Copy-Item models\SmolLM2-135M-Instruct staging\code-dir\resources\model\ -Recurse
 
 # ③ 数据集 + 出生证
 Copy-Item data\dpo_identity_v5.jsonl, data\MANIFEST.json staging\code-dir\resources\dataset\
@@ -241,6 +242,7 @@ New-Item -Force -ItemType Directory outputs\local-run | Out-Null
 docker run --rm `
   -v "${PWD}\staging\code-dir:/home/ma-user/modelarts/user-job-dir/code-dir:ro" `
   -v "${PWD}\outputs\local-run:/home/ma-user/output" `
+  -e MA_CODE_DIR=/home/ma-user/modelarts/user-job-dir/code-dir `
   -e MODEL_PATH=/home/ma-user/modelarts/user-job-dir/code-dir/resources/model/SmolLM2-135M-Instruct `
   -e DATASET=/home/ma-user/modelarts/user-job-dir/code-dir/resources/dataset `
   smollm2-dpo-modelarts:cpu-v1 `
@@ -251,10 +253,14 @@ docker run --rm `
 说明：
 
 - 挂载点刻意复刻云端路径 `/home/ma-user/modelarts/user-job-dir/code-dir`——
-  环境变量取值与阶段 6 控制台里填的**逐字符相同**；
-- `run_train.sh` 找不到 `MA_CODE_DIR`/`MA_JOB_DIR`（本地没这两个平台变量）时，
-  三级兜底的第三级（硬编码路径）命中，日志会打印兜底过程——正常；
-- CPU 上全程约 1 小时量级（与云端 2 核规格同量级，视本机 CPU）；
+  `MODEL_PATH`/`DATASET`/启动命令与阶段 6 控制台里填的**逐字符相同**；
+- `-e MA_CODE_DIR=...`：云端这个变量由**平台自动注入**，本地没有平台，由你扮演
+  平台注入同一个值（这正是阶段 6 说"用户永不配置 MA_CODE_DIR"的含义——那是指
+  别在控制台环境变量面板里填它；本地 docker run 里的这一行是在模拟平台行为）。
+- 日志开头能看到三级兜底的 `兜底 1/MA_CODE_DIR 命中`——本地注入的这个变量
+  就是云端平台注入的那个，走到同一分支；
+- 全程时长看机器：本机容器内实测评估 ~5-6s/prompt（约为云端 2u 规格的 4-5 倍
+  **快**），全程估 30-60 分钟；机器更弱则按比例拉长，数小时也可能——挂后台跑最稳；
 - **预期结束形态**：四段 `[stage]` 全走完 → 产物落在 `outputs\local-run\`
   （权重 + eval_dpo.json + train_log.jsonl + RUN_ID）→ 最后自传段因缺 MoXing
   报错退出（非零退出码）。**这不是失败**——MoXing 只存在于 ModelArts 训练容器里。
