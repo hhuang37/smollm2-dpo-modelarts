@@ -11,29 +11,32 @@
 
 ## 全链路地图
 
-```
-本机                                            华为云
-────                                            ──────
-notebooks/build_dpo_dataset.ipynb
-  基模采样生成 rejected ──> data/dpo_identity_v5.jsonl
-                                │
-staging/code-dir/ 组装          │
-  （代码+基模+数据+CODE_VERSION）│
-  │                             │
-  ├──(阶段4,可选) docker run 同镜像同目录本地全量训练
-  │                             │
-docker build 纯运行时镜像 ──────┼──> SWR 镜像仓库（直推或 Docker Hub 中转）
-staging/code-dir/ 整树上传 ─────┴──> OBS obs://<桶>/code-dir/
-                                                │
-                              ModelArts 控制台创建训练作业
-                                镜像=SWR镜像 + 代码目录=OBS code-dir
-                                                │
-                              容器内 bash run_train.sh
-                                校验→定位→检查→DPO训练→训前训后held-out评估
-                                                │
-                              MoXing 自传产物 ──> OBS obs://<桶>/outputs/dpo-run/<run_id>/
-                                                │
-本机 <────────── 下载产物核对指纹 + chat.py 对话验收
+读法：**自上而下 = 阶段 1→7 的执行顺序**；【】标注该步在哪头执行；`├──>` 指向产物在云端的落点；阶段 4 是可跳过的本地验证支线。
+
+```text
+阶段1【本机】notebooks/build_dpo_dataset.ipynb
+             基模采样 rejected + 规则构造 chosen → data/dpo_identity_v5.jsonl
+                        │
+阶段2【本机】docker build 纯运行时镜像 smollm2-dpo-modelarts:cpu-v1（只装依赖）
+                        │
+阶段3【本机】组装 staging/code-dir/（代码 + 基模 + 数据 + CODE_VERSION）
+                        │
+                        ├─（可选）阶段4：docker run 同镜像 + 同代码目录本地全量训练
+                        │            产物落 outputs/local-run/，chat.py 顺手验收
+                        │
+阶段5A【本机→云】docker push 推镜像（直推，或 Docker Hub + crane 中转）
+                        ├──────> SWR 镜像仓库
+阶段5B【本机→云】upload-code-dir.py 代码目录整树上传（幂等续传）
+                        ├──────> OBS obs://<桶>/code-dir/
+                        │
+阶段6【云端】ModelArts 控制台创建训练作业（镜像 = SWR，代码目录 = OBS code-dir）
+                        │
+      【云端】容器内 bash run_train.sh：校验 → 定位 → 检查 → DPO 训练 → 训前/训后 held-out 评估
+                        │
+      【云端】MoXing 产物自传（按 run_id 分子目录）
+                        ├──────> OBS obs://<桶>/outputs/dpo-run/<run_id>/
+                        │
+阶段7【本机】download-outputs.py 下载产物：指纹核对 + chat.py 对话验收
 ```
 
 三层分层（本方案的核心架构主张）：
@@ -411,7 +414,89 @@ Get-FileHash data\dpo_identity_v5.jsonl -Algorithm MD5   # 与 eval_dpo.json 里
 # 期望：I am Huang, ...
 ```
 
-### 7.5 收尾
+### 7.5 验收 ④（可选但推荐）：GGUF → LM Studio 第三方引擎三问
+
+chat.py（验收 ③）证明的是"权重在 transformers 引擎里对"；这一步把权重转成
+llama.cpp 生态的标准格式 **GGUF**，装进 **LM Studio** 桌面端问三句——证明
+"训出来的权重在第三方推理引擎里也站得住"。全程本地、¥0，也是把权重交付到
+LM Studio / Ollama / llama.cpp server 这条生态路线的入口。
+
+**① 转换 HF → GGUF**（用官方转换镜像，免 clone 免装依赖，约 1-2 分钟）：
+
+```powershell
+New-Item -Force -ItemType Directory outputs\lmstudio | Out-Null
+
+docker run --rm `
+  -v "${PWD}\outputs\dpo-run\<run_id>:/models/in:ro" `   # 本地验证的产物则挂 outputs\local-run
+  -v "${PWD}\outputs\lmstudio:/models/out" `
+  ghcr.io/ggml-org/llama.cpp:full `
+  --convert /models/in --outfile /models/out/dpo-f16.gguf
+```
+
+（Git Bash 跑加 `MSYS_NO_PATHCONV=1`。）产物约 **271MB**（f16）。
+可选量化（135M 模型上质量损失极小）：
+
+```powershell
+docker run --rm -v "${PWD}\outputs\lmstudio:/models" `
+  ghcr.io/ggml-org/llama.cpp:full `
+  --quantize /models/dpo-f16.gguf /models/dpo-q8_0.gguf Q8_0    # ~145MB
+```
+
+**② 放进 LM Studio 模型目录**（必须三层结构 `<模型目录>\<发布者>\<模型名>\<文件>.gguf`；
+自己的模型目录在 LM Studio 设置里查）：
+
+```powershell
+$dst = "D:\soft\lmstudio_models\posttrain\dpo-f16"       # 换成你的模型目录
+New-Item -Force -ItemType Directory $dst | Out-Null
+Copy-Item outputs\lmstudio\dpo-f16.gguf $dst
+```
+
+**③ 加载 + 三问**：LM Studio → 我的模型 → 加载 `posttrain/dpo-f16` → Chat 页依次问：
+
+| # | 问题 | 期望 |
+|---|---|---|
+| 1 | `Who are you?` | 含 **Huang** |
+| 2 | `What's your name?` | 含 **Huang** |
+| 3 | `Tell me about yourself.` | 含 **Huang** |
+
+对照基线：未训练的官方 SmolLM2-135M-Instruct 这三问答 "SmolLM / Hugging Face"——
+训后变成 Huang，就是 DPO 在第三方引擎里也生效的证据。
+
+**两个关键点**（都有实证教训）：
+
+- **System Prompt 留空直接问**：本链路数据是五形态（auto/explicit/empty/none/foreign）
+  混合构造的，身份不依赖任何开场白——留空、乱填都应稳定自称 Huang。这正是
+  held-out 五形态评估 100% 在引擎侧的体现；
+- **千万不要填 "You are Huang"**：那是把答案写进 prompt、用提示顶替权重，验证
+  就失效了。要看的恰恰是"无提示时权重自己说出 Huang"。
+
+排障速查：
+
+| 症状 | 处理 |
+|---|---|
+| 转换报 `unsupported architecture` | 镜像太旧不认 SmolLM2，重拉最新 `:full` tag |
+| LM Studio 里看不到模型 | 目录层级不对——必须 `<模型目录>\<发布者>\<模型名>\*.gguf` 三层 |
+| chat.py（7.4）也不答 Huang | 不是转换问题，训练/下载有问题——查 `eval_dpo.json` 的训后率 |
+| chat.py 答 Huang 但 LM Studio 不答 | 模板层问题：LM Studio 右侧 Prompt Template 选/贴 SmolLM2，再用下方裸测定位 |
+
+引擎级裸测（排障定位器——绕过所有 chat 封装直喂 chatml；它答 Huang 则引擎与
+GGUF 无罪，问题在 GUI/模板层）。注意 prompt 文件要放进**已挂载**的目录里，
+写宿主机 /tmp 容器里是看不见的：
+
+```bash
+printf '<|im_start|>user\nwhat is your name<|im_end|>\n<|im_start|>assistant\n' \
+  > outputs/lmstudio/p1.txt
+MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli `
+  -v "D:/work/smollm2-dpo-modelarts/outputs/lmstudio:/models:ro" `
+  ghcr.io/ggml-org/llama.cpp:full `
+  -m /models/dpo-f16.gguf -f /models/p1.txt -n 40 --temp 0 -c 512 `
+  --no-display-prompt --single-turn
+```
+
+（可选）LM Studio 还能起 OpenAI 兼容本地 server（Developer → Start Server，
+默认 `http://localhost:1234/v1`），用 API 形态再验一遍——部署成服务的样子。
+
+### 7.6 收尾
 
 - 作业记录保留（对照资产，不急着删）；费用合计 < ¥1.5；
 - `staging/`、`outputs/` 均为 gitignored 再生品，随时可删重产。
@@ -450,3 +535,4 @@ Get-FileHash data\dpo_identity_v5.jsonl -Algorithm MD5   # 与 eval_dpo.json 里
 | `git_commit` | = 阶段 3 写入 CODE_VERSION 的本仓 HEAD sha（版本链路全通） |
 | `dataset_fingerprint` | = 本地 `data/dpo_identity_v5.jsonl` 的 MD5，逐字符一致 |
 | 结束形态 | `[done] 五形态均值 0% -> 100%` → 自传段按预期失败（MoXing 仅训练容器内有）→ chat.py 对话输出 "I am Huang" |
+| GGUF + llama.cpp（验收 ④ 引擎级） | f16 GGUF 271MB 转换成功；裸 chatml 直测（temp=0）答 **"My name is Huang."**——第三方引擎侧身份成立 |
