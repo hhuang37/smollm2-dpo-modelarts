@@ -259,8 +259,8 @@ docker run --rm `
   别在控制台环境变量面板里填它；本地 docker run 里的这一行是在模拟平台行为）。
 - 日志开头能看到三级兜底的 `兜底 1/MA_CODE_DIR 命中`——本地注入的这个变量
   就是云端平台注入的那个，走到同一分支；
-- 全程时长看机器：本机容器内实测评估 ~5-6s/prompt（约为云端 2u 规格的 4-5 倍
-  **快**），全程估 30-60 分钟；机器更弱则按比例拉长，数小时也可能——挂后台跑最稳；
+- 全程时长看机器：本机实测全程 **~16 分钟**（含训前/训后评估与保存；评估
+  ~5-6s/prompt，约为云端 2u 规格的 4-5 倍快）；机器更弱则按比例拉长，挂后台跑最稳；
 - **预期结束形态**：四段 `[stage]` 全走完 → 产物落在 `outputs\local-run\`
   （权重 + eval_dpo.json + train_log.jsonl + RUN_ID）→ 最后自传段因缺 MoXing
   报错退出（非零退出码）。**这不是失败**——MoXing 只存在于 ModelArts 训练容器里。
@@ -434,3 +434,19 @@ Get-FileHash data\dpo_identity_v5.jsonl -Algorithm MD5   # 与 eval_dpo.json 里
 | 本地跑完退出码非零 | 自传段报 MoXing 不存在 | 预期行为：MoXing 平台预挂、仅训练容器内有；训练评估完成即通过 |
 | 容器内 pip 装 MoXing | `--user` 静默回退后 import 仍失败 | 平台 whl 装进 `~/.local` 不在 sys.path（`upload_outputs.py` 已内置修复，别绕过它自装） |
 | 超参名拼错 | 作业几秒内 Failed | argparse 严格校验 fail-fast，检查拼写（`lr` 不是 `learning_rate`） |
+
+---
+
+## 附：本地全量验证实测记录（2026-09-01，供重放者对照）
+
+按阶段 4 命令在本机跑通全程（镜像 cpu-v1 + staging/code-dir + 6 超参全量）：
+
+| 项 | 实测值 |
+|---|---|
+| 全程耗时（训练+双评估+保存） | **912 秒 ≈ 16 分钟** |
+| 训前基线（五形态 × 10 问） | 自称率 0%（基模自称 SmolLM） |
+| 训后评估 | **五形态均值 100%**（首答均为 "I am Huang, ..."） |
+| 产物 | 顶层恰 14 个文件（与云端 14 对象一一对应），`checkpoint-38/` 目录自传时自动跳过 |
+| `git_commit` | = 阶段 3 写入 CODE_VERSION 的本仓 HEAD sha（版本链路全通） |
+| `dataset_fingerprint` | = 本地 `data/dpo_identity_v5.jsonl` 的 MD5，逐字符一致 |
+| 结束形态 | `[done] 五形态均值 0% -> 100%` → 自传段按预期失败（MoXing 仅训练容器内有）→ chat.py 对话输出 "I am Huang" |
