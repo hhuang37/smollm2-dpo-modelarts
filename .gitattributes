@@ -1,0 +1,4 @@
+# run_train.sh 会被上传到 OBS 并在 Linux 容器里以 bash 执行：
+# Windows 上 core.autocrlf=true 会把它检出成 CRLF，容器里报 `\r: command not found`。
+# 钉死 LF，双保险（上传脚本从工作树原样读取）。
+*.sh text eol=lf
