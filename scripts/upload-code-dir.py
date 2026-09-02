@@ -203,7 +203,8 @@ def main():
         remote = {c.key: int(c.size) for c in (resp.contents or [])}
         local_sizes = {k: p.stat().st_size for p, k, _ in files}
         mismatch = [k for k in local_sizes if remote.get(PREFIX + k) != local_sizes[k]]
-        extra = sorted(set(remote) - set(local_sizes))
+        # 远端键带 PREFIX、计划键是裸键，比对前先对齐（否则全部误报清单外）
+        extra = sorted(set(remote) - {PREFIX + k for k in local_sizes})
 
         print(f"--- 终局核对：远端 {len(remote)} 对象 ---")
         for k in mismatch:
