@@ -1,29 +1,21 @@
-"""产物自传脚本（cpu-v3 新增，救活"控制台 + 自定义镜像"路线的产物回传）。
+"""训练产物自传脚本（训练完成后由 run_train.sh 调起，把产物传回 OBS）。
 
-背景（2026-08-30/31 探针五发实证，详见 docs/guides/hands-on-modelarts-dpo.md §3.1/§3.4）：
-新版控制台勾选「存储训练产物」只往主容器注入 OBS_MODEL_OUTPUT 环境变量（"给你张
-地址条"），上传是训练代码自己的责任。自传的凭证用容器内平台注入的临时凭证
-（/run/secrets/modelarts/user/config）——但五发探针实证该凭证是平台私有格式：
-esdk-obs-python 直签（V2/V4 签名 × 公共/内部端点共四变体）一律 403
-InvalidAccessKeyId；唯一认证的消费方式是 **MoXing**（mox.file 系列接口，容器内
-免配置、自动刷新凭证）。真 MoXing 不在 PyPI（同名包是占位假包），whl 由平台
-预挂在 /home/ma-user/modelarts/package/moxing_framework-*.whl，本脚本按官方
-FAQ 的姿势运行时自装（见 modelarts_faq modelarts_05_0394）。
-
-用法（控制台启动命令，训练完接续执行）：
-  python /home/ma-user/src/train_dpo.py --train_url /home/ma-user/output ... \
-    && python /home/ma-user/src/upload_outputs.py --train_url /home/ma-user/output
+为什么需要它：控制台勾选「存储训练产物」只往容器注入 OBS_MODEL_OUTPUT 环境变量
+（"给你张地址条"），上传是训练代码自己的责任。凭证不能用 AK/SK——容器里平台
+注入的临时凭证是平台私有格式，esdk-obs-python 直签一律 403；唯一认证的消费
+方式是 **MoXing**（mox.file 系列接口，容器内免配置、自动刷新凭证）。真 MoXing
+不在 PyPI（同名包是占位假包），whl 由平台预挂在
+/home/ma-user/modelarts/package/moxing_framework-*.whl，本脚本运行时自装。
 
 约定：
 - 目标地址读 OBS_MODEL_OUTPUT（缺失非零退出）；上传落 `<OBS_MODEL_OUTPUT>/<run_id>/`
-  子目录（v5 新增，研讨 Q4 拍板）：run_id 读 `<train_url>/RUN_ID`（train_dpo.py
-  训练开始时写入），重跑永不互相覆盖；RUN_ID 缺失退回顶层（打警告，兼容旧产物）。
-- API 建作业路线（outputs 通道 + sidecar 代传）不需要本脚本。
-- 只传 train_url 顶层文件（模型权重 + eval_*.json + train_log.jsonl + RUN_ID 等）；
-  checkpoint-*/ 是目录默认跳过（本 demo 训练步数 < save_steps 500，实际不产生，
-  开关仅防御）。
-- 每个文件传完用 mox.file.exists 复核；任一失败 => 非零退出 => 作业状态
-  Failed：显式失败优于静默丢产物。
+  子目录：run_id 读 `<train_url>/RUN_ID`（train_dpo.py 训练开始时写入），重跑永不
+  互相覆盖；RUN_ID 缺失退回顶层（打警告，兼容旧产物）。
+- 只传 train_url 顶层文件（模型权重 + eval_dpo.json + train_log.jsonl + RUN_ID 等）；
+  checkpoint-*/ 目录默认跳过（--include_checkpoints 可开）。
+- 每个文件传完用 mox.file.exists 复核；任一失败 => 非零退出 => 作业状态 Failed：
+  显式失败优于静默丢产物。
+- 本地跑会因 MoXing whl 不存在而报错退出——预期行为（MoXing 仅训练容器内有）。
 """
 import argparse
 import glob
@@ -83,8 +75,8 @@ def run(args):
         sys.exit(1)
     target = target.rstrip("/") + "/"
 
-    # v5：按 run 分子目录（研讨 Q4 拍板）——RUN_ID 由 train_dpo.py 写入，
-    # 重跑永不覆盖；缺失退回顶层（兼容旧产物/旧排演），但要打警告。
+    # 按 run 分子目录——RUN_ID 由 train_dpo.py 写入，重跑永不覆盖；
+    # 缺失退回顶层（兼容旧产物/旧排演），但要打警告。
     run_id = ""
     run_id_path = os.path.join(args.train_url, "RUN_ID")
     if os.path.isfile(run_id_path):
