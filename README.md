@@ -609,6 +609,10 @@ Copy-Item outputs\lmstudio\dpo-f16.gguf $dst
 对照基线：未训练的官方 SmolLM2-135M-Instruct 这三问答 "SmolLM / Hugging Face"——
 训后变成 Huang，就是 DPO 在第三方引擎里也生效的证据。
 
+**实操实录（42 秒）**：[▶ LM Studio 三问演示视频](docs/lmstudio-3q-demo.mp4)
+——加载训后的 `dpo-f16`、System Prompt 留空，三问依次作答均自称 Huang
+（GitHub 页面打开即可播放）。
+
 #### 6.6 收尾
 
 - 作业记录保留（对照资产，不急着删）；费用合计 < ¥1.5；
