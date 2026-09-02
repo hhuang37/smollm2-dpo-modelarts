@@ -19,10 +19,13 @@ Thumbs.db
 models/
 data/
 
-# 代码目录组装产物（阶段 3 组装、阶段 4 本地验证挂载点）
+# 历史遗留：旧版 staging 组装产物（现行流程无此目录，可整目录删除）
 staging/
 
 # 训练产物（本地验证输出 + 云端下载的产物）
 outputs/
 
 *.log
+
+# codegraph 工具索引（本地生成，不入库）
+.codegraph/

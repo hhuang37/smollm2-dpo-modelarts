@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    构建训练镜像 + 冒烟验收（GUIDE.md 阶段 2 的自动化版，手敲等效命令见手册）。
+    构建训练镜像 + 冒烟验收（README.md 阶段 2 的自动化版，手敲等效命令见手册）。
 
 .DESCRIPTION
     两个硬性细节（都不是可选项）：
@@ -53,7 +53,7 @@ try {
     Write-Host ($out -join "`n") -ForegroundColor White
 
     Write-Host '=== 全部通过 ===' -ForegroundColor Green
-    Write-Host "推送到 SWR 的命令见 GUIDE.md 阶段 5A（tag 成 <registry>/<org>/$full 后 docker push，或走中转路线）"
+    Write-Host "推送到 SWR 的命令见 README.md 阶段 4A（tag 成 <registry>/<org>/$full 后 docker push，或走中转路线）"
 }
 finally {
     Pop-Location
