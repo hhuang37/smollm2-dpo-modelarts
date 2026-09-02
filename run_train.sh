@@ -77,17 +77,6 @@ try_code_dir "1/MA_CODE_DIR" "${MA_CODE_DIR:-}" \
         exit 1
     }
 
-# v5 可复现性（研讨 Q3 拍板）：训练容器里没有 git，git sha 靠上传时烤进
-# 代码目录的 CODE_VERSION 文件（upload-code-dir.py 现场跑本机 `git rev-parse
-# --short HEAD` 生成）。读出来注入 GIT_COMMIT，train_dpo.py 用它拼 run_id。
-# 缺失不致命（旧目录/排演可跑），只打提示。
-if [[ -f "$CODE_DIR/CODE_VERSION" ]]; then
-    export GIT_COMMIT="$(tr -d '[:space:]' < "$CODE_DIR/CODE_VERSION")"
-    echo "[run_train.sh][v5] CODE_VERSION -> GIT_COMMIT=$GIT_COMMIT" >&2
-else
-    echo "[run_train.sh][v5] $CODE_DIR/CODE_VERSION 不存在——run_id 的 git 部分将记 nogit" >&2
-fi
-
 # ------------------------------------------------------------------------------
 # 段 3/4：存在性检查（贵操作前先失败）
 # ------------------------------------------------------------------------------

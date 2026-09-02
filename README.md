@@ -51,7 +51,7 @@
 | 层 | 放什么 | 在哪 |
 |---|---|---|
 | 镜像 | 只装运行环境（python + torch + 依赖） | SWR，极少变化 |
-| 代码目录 | 训练代码 + 基模 + 数据集 + CODE_VERSION | OBS `code-dir/`，每次变更重传 |
+| 代码目录 | 训练代码 + 基模 + 数据集 | OBS `code-dir/`，每次变更重传 |
 | 作业配置 | 路径环境变量 + 超参 + 产物地址 | ModelArts 控制台表单 |
 
 换模型 / 换数据 / 改代码：**零重建镜像**，只重传代码目录；换依赖才重建镜像。
@@ -92,7 +92,7 @@
 | `docker/requirements.txt` | 镜像内训练依赖（版本全部 pin 死） | 2 |
 | `requirements-local.txt` | 本机环境依赖（数据构造 + 对话验收 + OBS 脚本），版本与镜像内一致 | 0 |
 | `scripts/build-image.ps1` | 构建 + 冒烟一键化（`--provenance=false` + manifest 断言 + import 冒烟） | 2 |
-| `scripts/upload-code-dir.py` | 代码目录上 OBS：内建布局映射，从仓库源位置直传 12 对象（CODE_VERSION 现场生成）；幂等续传 + 重试 + 终局核对，`--dry-run` 可预演 | 4B |
+| `scripts/upload-code-dir.py` | 代码目录上 OBS：内建布局映射，从仓库源位置直传 11 对象；幂等续传 + 重试 + 终局核对，`--dry-run` 可预演 | 4B |
 | `scripts/upload-one.py` | 单文件补传 OBS（上传失败的大文件/漏传对象），幂等 + ETag 校验；`--from-obs` 走桶内服务端复制 | 4B |
 | `scripts/download-outputs.py` | 云端产物下载（保留 run_id 目录层级） | 6 |
 | `scripts/relay-image-to-swr.ipynb` | 镜像中转（**可选**）：本机在国外时，经 Docker Hub 中转把镜像搬进 SWR | 附录 B |
@@ -296,9 +296,8 @@ MSYS_NO_PATHCONV=1 docker run --rm \
 **预期结束形态（必读，别被吓到）**：四段 `[stage]` 全走完 → 产物落在
 `outputs\local-run\`（权重 + eval_dpo.json + train_log.jsonl + RUN_ID）→ **最后自传段
 报错退出（非零退出码）——这不是失败**：MoXing 只存在于 ModelArts 训练容器里，本地没有。
-另：本地没有 CODE_VERSION 文件（那是云端代码目录的对象，由上传脚本生成），日志里
-`将记 nogit` 同样属预期。训练和评估完成即本地验证通过。
-全程时长看机器：本机实测 ~17 分钟（1014 秒，约为云端 2u 的 4 倍快）；挂后台跑最稳。
+训练和评估完成即本地验证通过。
+全程时长看机器：本机实测 ~16 分钟（963 秒，约为云端 2u 的 4 倍快）；挂后台跑最稳。
 
 本地顺手验收（等价于云端验收 ③，见 6.4）：
 
@@ -375,28 +374,25 @@ SWR 版本详情）一致才证明"云端那份 = 本地验证过的那份"。�
 
 #### 照做区
 
-> 目标一句话：把仓库里的训练物料——入口 + 训练代码 + 基模 + 数据集，共 12 个
+> 目标一句话：把仓库里的训练物料——入口 + 训练代码 + 基模 + 数据集，共 11 个
 > 对象 ≈271MB——按云端代码目录的固定布局传上 OBS 的 `code-dir/`。**没有本地
-> 中间层**：布局映射（哪个源文件传到哪个 OBS key）内建在 upload-code-dir.py 里，
-> CODE_VERSION 也由它现场 `git rev-parse` 生成。
+> 中间层**：布局映射（哪个源文件传到哪个 OBS key）内建在 upload-code-dir.py 里。
 
 ```powershell
 # 先预演（只对照远端状态，不写云）：
 python scripts\upload-code-dir.py --dry-run
 # 真上传（幂等可重跑；断了 Ctrl+C 再跑一次，已传对象自动跳过）：
 python scripts\upload-code-dir.py
-# 期望最后一行：[done] 12 个对象全部在云且核对一致
+# 期望最后一行：[done] 11 个对象全部在云且核对一致
 ```
 
-改了代码或数据？**重跑同一条命令**就是全部——脚本永远读当前仓库内容、
-CODE_VERSION 永远取当前 HEAD sha。
+改了代码或数据？**重跑同一条命令**就是全部——脚本永远读当前仓库内容。
 
-**验收——对着这棵树数，恰好 12 个对象**（桶名以 `posttrain` 为例）：
+**验收——对着这棵树数，恰好 11 个对象**（桶名以 `posttrain` 为例）：
 
 ```text
 obs://posttrain/code-dir/                  ← 阶段 5「代码目录」填这个
 ├── run_train.sh                           ← 本机 run_train.sh
-├── CODE_VERSION                           ← 上传脚本现场生成（git short sha）
 ├── src/                                   ← 本机 src\（下面 3 个 .py）
 │   ├── train_dpo.py
 │   ├── common.py
@@ -421,10 +417,9 @@ obs://posttrain/outputs/dpo-run/           ← 本机没有对应物：作业运
 #### 原理区
 
 - **布局映射内建在脚本里**：云端代码目录长什么样（`src/`、`resources/model/…`、
-  `resources/dataset/…`、`CODE_VERSION`）就是 upload-code-dir.py 开头那张
-  源文件→OBS key 映射表；本机不存在对应的中间目录，也就没有"本地/云端两边
-  对不齐"的问题。改了代码/数据，重跑脚本即传最新（含重新生成的 CODE_VERSION
-  ——别手改云端那个对象，重跑脚本即可刷新）。
+  `resources/dataset/…`）就是 upload-code-dir.py 开头那张源文件→OBS key 映射表；
+  本机不存在对应的中间目录，也就没有"本地/云端两边对不齐"的问题。改了代码/数据，
+  重跑脚本即传最新。
 - **幂等机制**：每个对象先 head 比对 ETag==MD5，一致则跳过——**断点续传=重跑**；
   传完自动 list 对账（大小逐对象 + 清单外多余对象），`[done]` 才算过。
 - **大文件与国际线路**：269MB 权重是单段 PUT。国内线路分钟级；国际线路偶发**僵死**
@@ -480,7 +475,7 @@ obs://posttrain/outputs/dpo-run/           ← 本机没有对应物：作业运
 
 - [ ] **镜像在**：SWR（区域=华北-北京四 → 组织 `<org>`）里看得到
       `smollm2-dpo-modelarts:cpu-v1`，digest 与本机 `docker image inspect` 一致；
-- [ ] **12 个对象在**：桶里 `code-dir/` 恰好 12 个对象，`model/SmolLM2-135M-Instruct/`
+- [ ] **11 个对象在**：桶里 `code-dir/` 恰好 11 个对象，`model/SmolLM2-135M-Instruct/`
       层有 `model.safetensors`（~269MB）——缺权重容器里报
       `OSError: no file named … model.safetensors`；
 - [ ] **四处同名**：代码目录 / 启动命令 / MODEL_PATH / DATASET 里的文件夹段
@@ -535,8 +530,7 @@ obs://posttrain/outputs/dpo-run/           ← 本机没有对应物：作业运
 作业日志里依次出现（缺一个就是没走完）：
 
 - 四段 `[stage] 1/4 … 4/4` 全走；
-- `[run_train.sh][v5] CODE_VERSION -> GIT_COMMIT=<sha>`（与上传脚本现场生成的 CODE_VERSION 一致）；
-- `[v5] run_id=<时间戳>-<sha> seed=42`；
+- `[v5] run_id=<UTC 时间戳> seed=42`；
 - `[done] 五形态均值 0% -> 100%`（训前模型乱答 → 训后五形态全对，held-out 口径）；
 - `[upload]` 逐文件 + `[run_train.sh][done] 训练 + 自传全部完成`。
 
@@ -694,23 +688,24 @@ MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli \
 
 | 项 | 实测值 |
 |---|---|
-| 全程耗时（训练+双评估+保存） | **1014 秒 ≈ 17 分钟** |
+| 全程耗时（训练+双评估+保存） | **963 秒 ≈ 16 分钟** |
 | 训前基线（五形态 × 10 问） | 自称率 0%（基模自称 SmolLM） |
 | 训后评估 | **五形态均值 100%**（首答均为 "I am Huang, ..."） |
 | 产物 | 顶层恰 14 个文件（与云端 14 对象一一对应），`checkpoint-38/` 目录自传时自动跳过 |
-| `run_id` | `20260902-095455-nogit`——本地没有 CODE_VERSION，git 部分记 `nogit`（预期；云端同日记 `6bae0b8`，见下） |
+| `run_id` | `20260902-134200`（纯 UTC 时间戳，写进 RUN_ID 供自传分目录） |
 | `dataset_fingerprint` | = 本地 `data\dpo_identity_v5.jsonl` 的 MD5（`f28f3824…`），逐字符一致 |
 | 结束形态 | `[done] 五形态均值 0% -> 100%` → 自传段非零退出（MoXing 仅训练容器内有）→ 容器内 `chat.py` 对话输出 "I am Huang" |
 
 **同日云端对照**（API 建作业 `dpo-run-002-api`，规格 cpu.2u）：全程 4176 秒（本地约快
-4 倍）；`run_id=20260902-103641-6bae0b8`（CODE_VERSION → GIT_COMMIT 机制云端生效）；
-数据指纹同上、五形态同样 0% → 100%；MoXing 自传 14 个对象落
-`obs://<桶>/outputs/dpo-run/<run_id>/`。本地与云端两条验证链在同一代码版本（6bae0b8）
+4 倍）；数据指纹同上、五形态同样 0% → 100%；MoXing 自传 14 个对象落
+`obs://<桶>/outputs/dpo-run/<run_id>/`（该轮 run_id=`20260902-103641-6bae0b8`，
+OBS 目录名即用它）。本地与云端两条验证链在同一代码版本（6bae0b8）
 下结论一致。
 
-> 历史：2026-09-01 曾按旧 staging 流程实测 912 秒（超参含现已移除的 `n_samples`），
-> 本记录即其替代。GGUF + llama.cpp 引擎级验收（f16 GGUF 271MB，temp=0 答
-> "My name is Huang."）实测于 09-01 等价模型，链路不随仓库重构变化，演示见 6.5。
+> 历史：2026-09-01 曾按旧 staging 流程实测 912 秒（超参含现已移除的 `n_samples`）；
+> 2026-09-02 上午同流程再实测 1014 秒——本记录（同日晚间复跑）即其替代。GGUF +
+> llama.cpp 引擎级验收（f16 GGUF 271MB，temp=0 答 "My name is Huang."）实测于
+> 09-01 等价模型，链路不随仓库重构变化，演示见 6.5。
 
 ---
 

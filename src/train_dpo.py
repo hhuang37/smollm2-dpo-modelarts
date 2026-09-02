@@ -9,10 +9,8 @@
   4. 训后评估 + 保存；eval_dpo.json / train_log.jsonl / RUN_ID 写 train_url
 
 可复现性：
-  - --seed 固定全部随机源；run_id = UTC 时间戳 + git sha（GIT_COMMIT env 优先
-    ——云端由 run_train.sh 从代码目录的 CODE_VERSION 注入，容器里没有 git；
-    本地兜底 `git rev-parse`），写 <train_url>/RUN_ID 供自传脚本按 run 分子目录
-    上传（重跑永不互相覆盖）
+  - --seed 固定全部随机源；run_id = UTC 时间戳，写 <train_url>/RUN_ID 供自传
+    脚本按 run 分子目录上传（重跑永不互相覆盖）
   - dataset_fingerprint = 数据文件 MD5——验收时与本地数据比对（README 6.3）
 
 日志：全程 logging → stdout，每优化步打 loss/rewards；异常 [FATAL] + 非零退出。
@@ -22,7 +20,6 @@ import argparse
 import hashlib
 import json
 import os
-import subprocess
 import sys
 import time
 
@@ -59,23 +56,6 @@ def _load_static_pairs(path: str) -> list:
     return rows
 
 
-def _resolve_git_commit() -> str:
-    """git sha 解析：① GIT_COMMIT env（云端由 run_train.sh 从 CODE_VERSION 注入，
-    容器里没有 git，这是唯一可靠来源）→ ② 本地兜底 `git rev-parse` → ③ "nogit"。
-    """
-    sha = os.environ.get("GIT_COMMIT", "").strip()
-    if sha:
-        return sha
-    try:
-        r = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
-                           capture_output=True, text=True, timeout=10)
-        if r.returncode == 0 and r.stdout.strip():
-            return r.stdout.strip()
-    except Exception:
-        pass
-    return "nogit"
-
-
 def _file_md5(path: str) -> str:
     """数据集指纹（内容寻址，防"名字一样内容变了"的静默漂移）。"""
     h = hashlib.md5()
@@ -108,11 +88,10 @@ def run(args):
     # --- 可复现性：seed / run_id（在任何随机行为发生之前固定） ---
     from transformers import set_seed
     set_seed(args.seed)   # random / numpy / torch / CUDA 一次全固
-    git_commit = _resolve_git_commit()
-    run_id = time.strftime("%Y%m%d-%H%M%S", time.gmtime()) + "-" + git_commit
+    run_id = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
     with open(os.path.join(args.train_url, "RUN_ID"), "w", encoding="utf-8") as f:
         f.write(run_id)
-    logger.info("[v5] run_id=%s seed=%d git_commit=%s", run_id, args.seed, git_commit)
+    logger.info("[v5] run_id=%s seed=%d", run_id, args.seed)
 
     model, tokenizer = load_model_and_tokenizer(args.model_name)
 
@@ -172,7 +151,6 @@ def run(args):
         "model": args.model_name,
         "identity_name": args.identity_name,
         "run_id": run_id,
-        "git_commit": git_commit,
         "seed": args.seed,
         "data_version": data_version,
         "dataset_fingerprint": dataset_fingerprint,
