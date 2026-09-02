@@ -298,7 +298,7 @@ MSYS_NO_PATHCONV=1 docker run --rm \
 报错退出（非零退出码）——这不是失败**：MoXing 只存在于 ModelArts 训练容器里，本地没有。
 另：本地没有 CODE_VERSION 文件（那是云端代码目录的对象，由上传脚本生成），日志里
 `将记 nogit` 同样属预期。训练和评估完成即本地验证通过。
-全程时长看机器：本机实测 ~16 分钟（约为云端 2u 的 4-5 倍快）；挂后台跑最稳。
+全程时长看机器：本机实测 ~17 分钟（1014 秒，约为云端 2u 的 4 倍快）；挂后台跑最稳。
 
 本地顺手验收（等价于云端验收 ③，见 6.4）：
 
@@ -680,6 +680,7 @@ MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli \
 | 269MB 权重上传失败/漏传没发现 | 容器里 `OSError: no file named … model.safetensors …`（目录在、权重缺） | 重跑 `upload-code-dir.py`（幂等续传）或 `upload-one.py` 单点补传；以脚本终局核对 `[done]` 为准，再重新提交作业 |
 | 国际直推 SWR | ~20KB/s 传不动 | 走附录 B 中转路线（Docker Hub + notebook crane） |
 | OBS SDK 属性名 | `AttributeError: etag` / 比大小恒错 | v1 SDK 是 `e_tag`；list 的 `size` 是字符串须 `int()`（本仓库脚本已处理） |
+| OBS SDK list 分页判据 | 翻页看 `is_truncated` 恒为 `True`（哪怕单页就装下了全部对象），死循环翻同一页 | 续页判据**只能用 `next_marker`**（空 = 最后一页）；仓库脚本均单页 ≤1000 对象不翻页，自写脚本时注意 |
 | 本地跑完退出码非零 | 自传段报 MoXing 不存在 | 预期行为：MoXing 平台预挂、仅训练容器内有；训练评估完成即通过 |
 | 容器内 pip 装 MoXing | `--user` 静默回退后 import 仍失败 | 平台 whl 装进 `~/.local` 不在 sys.path（`upload_outputs.py` 已内置修复，别绕过它自装） |
 | 超参名拼错 | 作业几秒内 Failed | argparse 严格校验 fail-fast，检查拼写（`lr` 不是 `learning_rate`） |
@@ -687,22 +688,29 @@ MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli \
 
 ---
 
-## 附录 A：本地全量验证实测记录（2026-09-01，供重放者对照）
+## 附录 A：本地全量验证实测记录（2026-09-02，供重放者对照）
 
-按阶段 3 命令在本机跑通全程（镜像 cpu-v1 + 全量超参。注：该记录采集于旧 staging
-流程——当时挂载的是组装出的 code-dir、超参含现已移除的 `n_samples`；现行直挂仓库
-流程下本地 `run_id` 的 git 部分记 `nogit`，属预期）：
+按阶段 3 命令（直挂整仓库流程）在本机跑通全程（镜像 cpu-v1 + 全量超参）：
 
 | 项 | 实测值 |
 |---|---|
-| 全程耗时（训练+双评估+保存） | **912 秒 ≈ 16 分钟** |
+| 全程耗时（训练+双评估+保存） | **1014 秒 ≈ 17 分钟** |
 | 训前基线（五形态 × 10 问） | 自称率 0%（基模自称 SmolLM） |
 | 训后评估 | **五形态均值 100%**（首答均为 "I am Huang, ..."） |
 | 产物 | 顶层恰 14 个文件（与云端 14 对象一一对应），`checkpoint-38/` 目录自传时自动跳过 |
-| `git_commit` | = 本仓 HEAD sha（旧 staging 流程经 CODE_VERSION 带入；现行流程云端值来自上传脚本现场生成，本地验证记 nogit） |
-| `dataset_fingerprint` | = 本地 `data\dpo_identity_v5.jsonl` 的 MD5，逐字符一致 |
-| 结束形态 | `[done] 五形态均值 0% -> 100%` → 自传段按预期失败（MoXing 仅训练容器内有）→ chat.py 对话输出 "I am Huang" |
-| GGUF + llama.cpp（验收 ④ 引擎级） | f16 GGUF 271MB 转换成功；裸 chatml 直测（temp=0）答 **"My name is Huang."**——第三方引擎侧身份成立 |
+| `run_id` | `20260902-095455-nogit`——本地没有 CODE_VERSION，git 部分记 `nogit`（预期；云端同日记 `6bae0b8`，见下） |
+| `dataset_fingerprint` | = 本地 `data\dpo_identity_v5.jsonl` 的 MD5（`f28f3824…`），逐字符一致 |
+| 结束形态 | `[done] 五形态均值 0% -> 100%` → 自传段非零退出（MoXing 仅训练容器内有）→ 容器内 `chat.py` 对话输出 "I am Huang" |
+
+**同日云端对照**（API 建作业 `dpo-run-002-api`，规格 cpu.2u）：全程 4176 秒（本地约快
+4 倍）；`run_id=20260902-103641-6bae0b8`（CODE_VERSION → GIT_COMMIT 机制云端生效）；
+数据指纹同上、五形态同样 0% → 100%；MoXing 自传 14 个对象落
+`obs://<桶>/outputs/dpo-run/<run_id>/`。本地与云端两条验证链在同一代码版本（6bae0b8）
+下结论一致。
+
+> 历史：2026-09-01 曾按旧 staging 流程实测 912 秒（超参含现已移除的 `n_samples`），
+> 本记录即其替代。GGUF + llama.cpp 引擎级验收（f16 GGUF 271MB，temp=0 答
+> "My name is Huang."）实测于 09-01 等价模型，链路不随仓库重构变化，演示见 6.5。
 
 ---
 

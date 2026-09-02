@@ -78,8 +78,8 @@ try_code_dir "1/MA_CODE_DIR" "${MA_CODE_DIR:-}" \
     }
 
 # v5 可复现性（研讨 Q3 拍板）：训练容器里没有 git，git sha 靠上传时烤进
-# 代码目录的 CODE_VERSION 文件（upload-v5-code-dir.py 写本机 `git rev-parse
-# --short HEAD`）。读出来注入 GIT_COMMIT，train_dpo.py 用它拼 run_id。
+# 代码目录的 CODE_VERSION 文件（upload-code-dir.py 现场跑本机 `git rev-parse
+# --short HEAD` 生成）。读出来注入 GIT_COMMIT，train_dpo.py 用它拼 run_id。
 # 缺失不致命（旧目录/排演可跑），只打提示。
 if [[ -f "$CODE_DIR/CODE_VERSION" ]]; then
     export GIT_COMMIT="$(tr -d '[:space:]' < "$CODE_DIR/CODE_VERSION")"
