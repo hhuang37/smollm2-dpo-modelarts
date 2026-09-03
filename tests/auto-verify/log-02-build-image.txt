@@ -1,0 +1,77 @@
+=== 构建 smollm2-dpo-modelarts:cpu-v1 ===
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 2.85kB 0.0s done
+#1 DONE 0.1s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 ...
+
+#3 [auth] docker/dockerfile:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#2 resolve image config for docker-image://docker.io/docker/dockerfile:1
+#2 DONE 2.5s
+
+#4 docker-image://docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32
+#4 resolve docker.io/docker/dockerfile:1@sha256:ecfaec9ed6d810b56388c508f4121597bfbba70d41a6dfeee4d8cad5f295fc32 0.0s done
+#4 CACHED
+
+#5 [internal] load metadata for docker.io/library/python:3.10-slim
+#5 ...
+
+#6 [auth] library/python:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#5 [internal] load metadata for docker.io/library/python:3.10-slim
+#5 DONE 1.7s
+
+#7 [internal] load .dockerignore
+#7 transferring context: 251B done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 DONE 0.0s
+
+#9 [1/6] FROM docker.io/library/python:3.10-slim@sha256:fd76ade0c607f27677bc04be3c60749f400eedc941d9e72967e19a4cedff80c2
+#9 resolve docker.io/library/python:3.10-slim@sha256:fd76ade0c607f27677bc04be3c60749f400eedc941d9e72967e19a4cedff80c2 0.0s done
+#9 DONE 0.1s
+
+#9 [1/6] FROM docker.io/library/python:3.10-slim@sha256:fd76ade0c607f27677bc04be3c60749f400eedc941d9e72967e19a4cedff80c2
+#9 DONE 0.1s
+
+#8 [internal] load build context
+#8 transferring context: 71B done
+#8 DONE 0.0s
+
+#10 [5/6] COPY docker/requirements.txt /tmp/requirements.txt
+#10 CACHED
+
+#11 [3/6] WORKDIR /home/ma-user
+#11 CACHED
+
+#12 [2/6] RUN useradd -m -u 1000 ma-user
+#12 CACHED
+
+#13 [4/6] RUN pip install --no-cache-dir       --index-url https://download.pytorch.org/whl/cpu       --extra-index-url https://pypi.org/simple       torch==2.13.0+cpu
+#13 CACHED
+
+#14 [6/6] RUN pip install --no-cache-dir -r /tmp/requirements.txt
+#14 CACHED
+
+#15 exporting to image
+#15 exporting layers done
+#15 exporting manifest sha256:29a42988274b08e9755da19ac7c3a9a99721c9da5ccf20e3a4f2259e9b81be85 done
+#15 exporting config sha256:1f2df6501bcf29157e152a3c39dac3e8b0ebee1bfe1d9d2ad5102d5d36c56ad6 done
+#15 naming to docker.io/library/smollm2-dpo-modelarts:cpu-v1 done
+#15 unpacking to docker.io/library/smollm2-dpo-modelarts:cpu-v1 0.0s done
+#15 DONE 0.1s
+  [ok] smollm2-dpo-modelarts:cpu-v1 -> application/vnd.oci.image.manifest.v1+json（2007 B，无 attestation）
+=== 冒烟：import torch/transformers/trl + 版本 ===
+torch 2.13.0+cpu
+transformers 4.57.6
+trl 0.19.1
+datasets 3.6.0
+=== 全部通过 ===
+推送到 SWR 的命令见 README.md 阶段 4A（tag 成 <registry>/<org>/smollm2-dpo-modelarts:cpu-v1 后 docker push，或走中转路线）

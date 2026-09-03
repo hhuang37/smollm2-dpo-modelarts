@@ -11,7 +11,18 @@
 >
 > 命令以 Windows PowerShell 为主（Git Bash 用户注意 `MSYS_NO_PATHCONV=1`，
 > 防止 `/home/...` 容器路径被改写成 Windows 路径；各阶段也给了 bash 等价版）。
-> 命令里的 `python` / `jupyter` / `huggingface-cli` 指你在阶段 0.3 配好的那个解释器。
+> 命令里的 `python` / `jupyter` / `hf` 指你在阶段 0.3 配好的那个解释器。
+>
+> 文中 `issue #N` / `#N 探针` / `probe-*` 类编号引用指向研究仓库
+> `hhuang37/posttrain` 的 issue tracker 与探针作业（本仓库由其蒸馏而来），不影响照做。
+
+---
+
+## 目录
+
+- [全链路地图](#全链路地图) / [控制台词汇表](#控制台词汇表第一次碰华为云先花-3-分钟) / [物料清单](#物料清单仓库里每个文件是干什么的)
+- 阶段 0 [前置准备](#阶段-0前置准备) · 1 [构造训练数据](#阶段-1构造训练数据notebook) · 2 [构建训练镜像](#阶段-2构建训练镜像) · 3 [本地全量验证](#阶段-3本地全量验证可选但推荐) · 4 [上传](#阶段-4上传) · 5 [ModelArts 建作业](#阶段-5modelarts-控制台创建训练作业) · 6 [盯作业与验收](#阶段-6盯作业与验收)
+- [坑位速查](#坑位速查全部有实证) · [附录 A 本地验证实测记录](#附录-a本地全量验证实测记录2026-09-02供重放者对照) · [附录 B 镜像中转路线](#附录-b镜像中转路线仅本机在国外--直推-swr-僵死时)
 
 ---
 
@@ -93,10 +104,12 @@
 | `requirements-local.txt` | 本机环境依赖（数据构造 + 对话验收 + OBS 脚本），版本与镜像内一致 | 0 |
 | `scripts/build-image.ps1` | 构建 + 冒烟一键化（`--provenance=false` + manifest 断言 + import 冒烟） | 2 |
 | `scripts/upload-code-dir.py` | 代码目录上 OBS：内建布局映射，从仓库源位置直传 11 对象；幂等续传 + 重试 + 终局核对，`--dry-run` 可预演 | 4B |
+| `scripts/swr-login.py` | AK/SK 换 SWR 临时 docker login 凭证（控制台登录指令 24h 过期后的自动恢复路径） | 4A |
 | `scripts/upload-one.py` | 单文件补传 OBS（上传失败的大文件/漏传对象），幂等 + ETag 校验；`--from-obs` 走桶内服务端复制 | 4B |
 | `scripts/download-outputs.py` | 云端产物下载（保留 run_id 目录层级） | 6 |
 | `scripts/relay-image-to-swr.ipynb` | 镜像中转（**可选**）：本机在国外时，经 Docker Hub 中转把镜像搬进 SWR | 附录 B |
 | `.env.example` | 凭证与桶名模板（复制为 `.env`，gitignored） | 0 |
+| `tests/ai-verify/` | AI 自动化验证脚本（阶段 0→6 的回归复跑，含日志留档；见其 INDEX.md） | 全程 |
 | `.gitattributes` | 钉死 `*.sh` 行尾为 LF（Windows autocrlf 会让容器里 bash 报错） | — |
 | `.dockerignore` | 构建上下文只留 requirements（构建快、防大文件进镜像） | 2 |
 
@@ -134,6 +147,8 @@ git clone <本仓库地址> ; cd smollm2-dpo-modelarts
 
 - 选 A（手册标准）：`python -m venv .venv` → `.\.venv\Scripts\Activate.ps1` 激活 →
   `pip install -r requirements-local.txt`；之后各命令里的 `python` 就是 venv 的；
+  （bash 用户：`python -m venv .venv && source .venv/Scripts/activate`，Linux/macOS 是
+  `.venv/bin/activate`）
 - 选 B（已有现成 python，如 miniconda）：直接 `pip install -r requirements-local.txt`
   装进它，之后 `python` 就是它；
 - 无论选哪个，先用一行验证（跑不出 OK 就回去装），再把凭证模板复制成 `.env` 填好：
@@ -147,14 +162,30 @@ Copy-Item .env.example .env
 **0.4 下载基模**（约 269MB，5 个文件——数据构造、本地验证、上传都用它）：
 
 ```powershell
-# 国内机器建议先设镜像：$env:HF_ENDPOINT = "https://hf-mirror.com"
-huggingface-cli download HuggingFaceTB/SmolLM2-135M-Instruct `
+# 显式列 5 个文件：整仓下载会连带拉 onnx/ 等多余内容（25 个文件）
+# 国内机器可加 $env:HF_ENDPOINT = "https://hf-mirror.com"（注意：hub>=1.18 且本机
+# 存在 HF 登录 token 时镜像会报 FileMetadataError——删 ~/.cache/huggingface/token
+# 或直接走官方源均可，2026-09-02 实测）
+hf download HuggingFaceTB/SmolLM2-135M-Instruct `
+    config.json generation_config.json model.safetensors tokenizer.json tokenizer_config.json `
     --local-dir models\SmolLM2-135M-Instruct
 
 # 校验：应看到恰好这 5 个文件，model.safetensors 约 269MB
 ls models\SmolLM2-135M-Instruct
 # config.json  generation_config.json  model.safetensors  tokenizer.json  tokenizer_config.json
 ```
+
+Git Bash / Linux / macOS 等价版：
+
+```bash
+hf download HuggingFaceTB/SmolLM2-135M-Instruct \
+    config.json generation_config.json model.safetensors tokenizer.json tokenizer_config.json \
+    --local-dir models/SmolLM2-135M-Instruct
+ls models/SmolLM2-135M-Instruct   # 同上：恰好 5 个文件
+```
+
+> 命令历史：旧版 `huggingface-cli download ...` 在 huggingface_hub ≥1.18 已失效
+> （直接报错退出），新装环境一律用 `hf download`。
 
 ### 原理区
 
@@ -357,6 +388,14 @@ docker tag smollm2-dpo-modelarts:cpu-v1 swr.cn-north-4.myhuaweicloud.com/<org>/s
 docker push swr.cn-north-4.myhuaweicloud.com/<org>/smollm2-dpo-modelarts:cpu-v1
 ```
 
+> 登录凭证 **24 小时过期**（过期后 push 报 `Authenticate Error - Get user token
+> error`）。不想回控制台复制，可用 AK/SK 现场换临时凭证自动登录（脚本化 / CI
+> 友好，2026-09-02 实测）：
+>
+> ```powershell
+> python scripts\swr-login.py     # 换令牌并直接 docker login（token 不落盘）
+> ```
+
 **验收**：push 输出的 `digest: sha256:...` 与本地
 `docker image inspect --format "{{.Descriptor.digest}}" ...` 一致；SWR 控制台
 （**区域切到华北-北京四 → 组织管理 → 你的组织**）里能看到该镜像和 tag。
@@ -423,9 +462,10 @@ obs://posttrain/outputs/dpo-run/           ← 本机没有对应物：作业运
 - **幂等机制**：每个对象先 head 比对 ETag==MD5，一致则跳过——**断点续传=重跑**；
   传完自动 list 对账（大小逐对象 + 清单外多余对象），`[done]` 才算过。
 - **大文件与国际线路**：269MB 权重是单段 PUT。国内线路分钟级；国际线路偶发**僵死**
-  （线路抖动不是硬封锁）——脚本自动重试 3 次，仍不行就重跑续传；**若桶内已有同内容
-  对象**（旧版 code-dir 等），用 `upload-one.py <本地文件> <OBS key> --from-obs <桶内源>`
-  走**服务端复制**（华为云内网、秒级、零国际流量，脚本自动验源/目标 ETag==本地 MD5）。
+  （线路抖动不是硬封锁）——脚本自动重试 3 次，仍失败则**自动在桶内找同内容（同 ETag）
+  对象走服务端复制**（华为云内网、秒级、零国际流量，2026-09-02 实测回退有效）；
+  再不行重跑续传；极端情况用 `upload-one.py <本地文件> <OBS key> --from-obs <桶内源>`
+  手动指定源走复制（自动验源/目标 ETag==本地 MD5）。
 
 ---
 
@@ -540,6 +580,12 @@ obs://posttrain/outputs/dpo-run/           ← 本机没有对应物：作业运
 python scripts\download-outputs.py --prefix outputs/dpo-run/
 ```
 
+```bash
+# Git Bash / Linux / macOS 等价版
+python scripts/download-outputs.py --prefix outputs/dpo-run/
+md5sum data/dpo_identity_v5.jsonl    # 与 eval_dpo.json 里的指纹比对
+```
+
 - `outputs\dpo-run\<run_id>\` 下应 14 个对象：权重（~538MB）+ `eval_dpo.json` +
   `RUN_ID` + `train_log.jsonl` + config/tokenizer 全套；
 - **指纹核对**：`eval_dpo.json` 里的 `dataset_fingerprint` == 本地
@@ -586,7 +632,7 @@ docker run --rm -v "${PWD}\outputs\lmstudio:/models" `
 自己的模型目录在 LM Studio 设置里查）：
 
 ```powershell
-$dst = "D:\soft\lmstudio_models\posttrain\dpo-f16"       # 换成你的模型目录
+$dst = "$env:USERPROFILE\.cache\lm-studio\models\posttrain\dpo-f16"   # LM Studio 默认模型目录下的三层结构；自定义目录在 LM Studio 设置里查
 New-Item -Force -ItemType Directory $dst | Out-Null
 Copy-Item outputs\lmstudio\dpo-f16.gguf $dst
 ```
@@ -701,6 +747,13 @@ MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli \
 `obs://<桶>/outputs/dpo-run/<run_id>/`（该轮 run_id=`20260902-103641-6bae0b8`，
 OBS 目录名即用它）。本地与云端两条验证链在同一代码版本（6bae0b8）
 下结论一致。
+
+> **2026-09-03 全链路审计复跑**（AI 自动验证，产物与日志见 `tests/ai-verify/`）：
+> 在 683595a 上删旧重做全部阶段——数据集 MD5 逐字节复现（`f28f3824…`）；
+> 本地 849s、云端作业 `dpo-run-audit-api` 3772s（run_id `20260902-153844`），
+> 双侧五形态 0%→100%、指纹一致、chat 与 llama.cpp 引擎均答 Huang。
+> 该轮同时实证修订了本版三处内容：`hf download` 命令（issue 001/002）、
+> SWR 临时凭证自动登录（003）、上传脚本服务端复制回退（005）。
 
 > 历史：2026-09-01 曾按旧 staging 流程实测 912 秒（超参含现已移除的 `n_samples`）；
 > 2026-09-02 上午同流程再实测 1014 秒——本记录（同日晚间复跑）即其替代。GGUF +

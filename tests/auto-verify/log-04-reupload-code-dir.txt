@@ -1,0 +1,31 @@
+deleted 11
+[remote-clean] code-dir/ 已清空
+=== 代码目录上传 -> obs://posttrain/code-dir/（11 个对象，region cn-north-4, DRY-RUN） ===
+--- 待上传 11 个 / 跳过 0 个 / 合计 271.5 MB ---
+[would-upload] code-dir/run_train.sh
+[would-upload] code-dir/src/train_dpo.py
+[would-upload] code-dir/src/common.py
+[would-upload] code-dir/src/upload_outputs.py
+[would-upload] code-dir/resources/model/SmolLM2-135M-Instruct/model.safetensors
+[would-upload] code-dir/resources/model/SmolLM2-135M-Instruct/tokenizer.json
+[would-upload] code-dir/resources/model/SmolLM2-135M-Instruct/tokenizer_config.json
+[would-upload] code-dir/resources/model/SmolLM2-135M-Instruct/config.json
+[would-upload] code-dir/resources/model/SmolLM2-135M-Instruct/generation_config.json
+[would-upload] code-dir/resources/dataset/dpo_identity_v5.jsonl
+[would-upload] code-dir/resources/dataset/MANIFEST.json
+[dry-run] 未写云端。去掉 --dry-run 真上传。
+=== 代码目录上传 -> obs://posttrain/code-dir/（11 个对象，region cn-north-4） ===
+--- 待上传 11 个 / 跳过 0 个 / 合计 271.5 MB ---
+[OK] code-dir/run_train.sh  0.0 MB  2s
+[OK] code-dir/src/train_dpo.py  0.0 MB  1s
+[OK] code-dir/src/common.py  0.0 MB  2s
+[OK] code-dir/src/upload_outputs.py  0.0 MB  0s
+[OK] code-dir/resources/model/SmolLM2-135M-Instruct/model.safetensors  269.1 MB  9081s
+[OK] code-dir/resources/model/SmolLM2-135M-Instruct/tokenizer.json  2.1 MB  14s
+[OK] code-dir/resources/model/SmolLM2-135M-Instruct/tokenizer_config.json  0.0 MB  2s
+[OK] code-dir/resources/model/SmolLM2-135M-Instruct/config.json  0.0 MB  0s
+[OK] code-dir/resources/model/SmolLM2-135M-Instruct/generation_config.json  0.0 MB  0s
+[OK] code-dir/resources/dataset/dpo_identity_v5.jsonl  0.2 MB  2s
+[OK] code-dir/resources/dataset/MANIFEST.json  0.0 MB  0s
+--- 终局核对：远端 11 对象 ---
+[done] 11 个对象全部在云且核对一致 -> obs://posttrain/code-dir/

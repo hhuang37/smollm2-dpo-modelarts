@@ -1,0 +1,125 @@
+[run_train.sh] 兜底 1/MA_CODE_DIR 命中，代码目录：/home/ma-user/modelarts/user-job-dir/code-dir
+[run_train.sh] 数据集：/home/ma-user/modelarts/user-job-dir/code-dir/data/dpo_identity_v5.jsonl（300 行）
+[run_train.sh] 平台超参（5 个）：--beta=0.2 --lr=5e-5 --rpo_alpha=1.0 --epochs=1 --seed=42
+2026-09-02 14:58:55,923 [INFO] ======================================================================
+2026-09-02 14:58:55,923 [INFO] [banner] train_dpo.py
+2026-09-02 14:58:55,923 [INFO] [banner] python=3.10.21 torch=2.13.0+cpu transformers=4.57.6 trl=0.19.1
+2026-09-02 14:58:55,923 [INFO] [banner] cpu_cores=8 mem_total=8.0GB threads=4
+2026-09-02 14:58:55,923 [INFO] [banner] HF_ENDPOINT=(未设置，走官方源)
+2026-09-02 14:58:55,923 [INFO] [banner] param data_url = '/home/ma-user/modelarts/user-job-dir/code-dir/data/dpo_identity_v5.jsonl'
+2026-09-02 14:58:55,924 [INFO] [banner] param train_url = '/home/ma-user/output'
+2026-09-02 14:58:55,924 [INFO] [banner] param model_name = '/home/ma-user/modelarts/user-job-dir/code-dir/models/SmolLM2-135M-Instruct'
+2026-09-02 14:58:55,924 [INFO] [banner] param identity_name = 'Huang'
+2026-09-02 14:58:55,924 [INFO] [banner] param beta = 0.2
+2026-09-02 14:58:55,924 [INFO] [banner] param lr = 5e-05
+2026-09-02 14:58:55,924 [INFO] [banner] param rpo_alpha = 1.0
+2026-09-02 14:58:55,924 [INFO] [banner] param epochs = 1
+2026-09-02 14:58:55,924 [INFO] [banner] param seed = 42
+2026-09-02 14:58:55,924 [INFO] [banner] HW_AK = ***missing***
+2026-09-02 14:58:55,924 [INFO] [banner] HW_SK = ***missing***
+2026-09-02 14:58:55,924 [INFO] ======================================================================
+2026-09-02 14:58:55,939 [INFO] [v5] run_id=20260902-145855 seed=42
+2026-09-02 14:58:55,939 [INFO] [model] loading /home/ma-user/modelarts/user-job-dir/code-dir/models/SmolLM2-135M-Instruct ...
+2026-09-02 14:58:57,933 [INFO] [model] loaded in 2s, chat_template=builtin
+2026-09-02 14:58:57,933 [INFO] [stage] 1/4 训前基线评估（五形态 × 10 问）
+2026-09-02 14:58:57,940 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 14:59:46,324 [INFO] [gen] 10/10 elapsed 48s ETA 0s
+2026-09-02 14:59:46,324 [INFO] [gen] done: 10 answers in 48s (4.8s/prompt)
+2026-09-02 14:59:46,324 [INFO] [eval-v2] 形态 auto     自称率   0%  首答: I am a helpful AI assistant named SmolLM, trained by Hugging
+2026-09-02 14:59:46,324 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:00:36,956 [INFO] [gen] 10/10 elapsed 51s ETA 0s
+2026-09-02 15:00:36,956 [INFO] [gen] done: 10 answers in 51s (5.1s/prompt)
+2026-09-02 15:00:36,956 [INFO] [eval-v2] 形态 explicit 自称率   0%  首答: I am a helpful AI assistant named SmolLM, trained by Hugging
+2026-09-02 15:00:36,956 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:01:36,504 [INFO] [gen] 10/10 elapsed 60s ETA 0s
+2026-09-02 15:01:36,504 [INFO] [gen] done: 10 answers in 60s (6.0s/prompt)
+2026-09-02 15:01:36,504 [INFO] [eval-v2] 形态 empty    自称率   0%  首答: I'm a creative writing assistant, specializing in fiction, p
+2026-09-02 15:01:36,504 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:02:47,117 [INFO] [gen] 10/10 elapsed 71s ETA 0s
+2026-09-02 15:02:47,123 [INFO] [gen] done: 10 answers in 71s (7.1s/prompt)
+2026-09-02 15:02:47,124 [INFO] [eval-v2] 形态 none     自称率   0%  首答: I'm a seasoned travel writer and photographer, with a passio
+2026-09-02 15:02:47,124 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:03:37,175 [INFO] [gen] 10/10 elapsed 50s ETA 0s
+2026-09-02 15:03:37,176 [INFO] [gen] done: 10 answers in 50s (5.0s/prompt)
+2026-09-02 15:03:37,177 [INFO] [eval-v2] 形态 foreign  自称率   0%  首答: I'm a helpful assistant. I'm a language model designed to as
+2026-09-02 15:03:37,178 [INFO] [eval-v2] 五形态均值 0%（验收线 >=70%，且 empty/none 各 >=70%）
+2026-09-02 15:03:37,191 [INFO] [stage] 2/4 读静态数据集 /home/ma-user/modelarts/user-job-dir/code-dir/data/dpo_identity_v5.jsonl
+2026-09-02 15:03:37,217 [INFO] [data] 静态数据集 300 对（prompt/chosen/rejected 预渲染字符串）
+2026-09-02 15:03:37,274 [INFO] [stage] 3/4 DPO 训练（38 优化步）
+/usr/local/lib/python3.10/site-packages/torch/utils/data/dataloader.py:759: UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+  super().__init__(loader)
+{'loss': 2.474, 'grad_norm': 23.014705657958984, 'learning_rate': 5e-05, 'rewards/chosen': 0.0, 'rewards/rejected': 0.0, 'rewards/accuracies': 0.0, 'rewards/margins': 0.0, 'logps/chosen': -97.14958190917969, 'logps/rejected': -90.38191223144531, 'logits/chosen': 1.3109235763549805, 'logits/rejected': 2.03255033493042, 'nll_loss': 1.780888557434082, 'epoch': 0.02666666666666667}
+{'loss': 2.0312, 'grad_norm': 14.326105117797852, 'learning_rate': 4.868421052631579e-05, 'rewards/chosen': 1.3403867483139038, 'rewards/rejected': -0.026080014184117317, 'rewards/accuracies': 1.0, 'rewards/margins': 1.366466760635376, 'logps/chosen': -53.85200881958008, 'logps/rejected': -60.047332763671875, 'logits/chosen': 2.030491590499878, 'logits/rejected': 2.1577348709106445, 'nll_loss': 1.7786979675292969, 'epoch': 0.05333333333333334}
+{'loss': 1.765, 'grad_norm': 6.921061038970947, 'learning_rate': 4.736842105263158e-05, 'rewards/chosen': 0.858494758605957, 'rewards/rejected': -0.8575125932693481, 'rewards/accuracies': 1.0, 'rewards/margins': 1.7160072326660156, 'logps/chosen': -98.56901550292969, 'logps/rejected': -101.01789093017578, 'logits/chosen': 4.160593032836914, 'logits/rejected': 4.455650806427002, 'nll_loss': 1.5775294303894043, 'epoch': 0.08}
+{'loss': 1.6452, 'grad_norm': 5.99014949798584, 'learning_rate': 4.605263157894737e-05, 'rewards/chosen': 1.3770982027053833, 'rewards/rejected': -1.1495890617370605, 'rewards/accuracies': 1.0, 'rewards/margins': 2.5266871452331543, 'logps/chosen': -68.63838195800781, 'logps/rejected': -61.342891693115234, 'logits/chosen': 3.121046543121338, 'logits/rejected': 3.6167871952056885, 'nll_loss': 1.5043599605560303, 'epoch': 0.10666666666666667}
+{'loss': 1.4949, 'grad_norm': 5.601263999938965, 'learning_rate': 4.473684210526316e-05, 'rewards/chosen': 2.0592422485351562, 'rewards/rejected': -2.0064916610717773, 'rewards/accuracies': 1.0, 'rewards/margins': 4.065733909606934, 'logps/chosen': -70.82240295410156, 'logps/rejected': -87.87437438964844, 'logits/chosen': 3.5388712882995605, 'logits/rejected': 4.320784568786621, 'nll_loss': 1.4399397373199463, 'epoch': 0.13333333333333333}
+{'loss': 1.3206, 'grad_norm': 5.303687572479248, 'learning_rate': 4.342105263157895e-05, 'rewards/chosen': 2.761784315109253, 'rewards/rejected': -0.8734087944030762, 'rewards/accuracies': 1.0, 'rewards/margins': 3.635193109512329, 'logps/chosen': -62.88348388671875, 'logps/rejected': -79.49067687988281, 'logits/chosen': 2.6139140129089355, 'logits/rejected': 3.2120425701141357, 'nll_loss': 1.2618951797485352, 'epoch': 0.16}
+{'loss': 1.3424, 'grad_norm': 4.139552116394043, 'learning_rate': 4.210526315789474e-05, 'rewards/chosen': 3.639021873474121, 'rewards/rejected': -1.1532793045043945, 'rewards/accuracies': 1.0, 'rewards/margins': 4.792301177978516, 'logps/chosen': -80.5663070678711, 'logps/rejected': -98.44085693359375, 'logits/chosen': 3.7041618824005127, 'logits/rejected': 3.78165864944458, 'nll_loss': 1.3243906497955322, 'epoch': 0.18666666666666668}
+{'loss': 0.9843, 'grad_norm': 3.933889150619507, 'learning_rate': 4.078947368421053e-05, 'rewards/chosen': 3.994574546813965, 'rewards/rejected': -2.47249436378479, 'rewards/accuracies': 1.0, 'rewards/margins': 6.467068672180176, 'logps/chosen': -62.24308776855469, 'logps/rejected': -88.60210418701172, 'logits/chosen': 3.0591483116149902, 'logits/rejected': 3.665297031402588, 'nll_loss': 0.9409580230712891, 'epoch': 0.21333333333333335}
+{'loss': 0.9934, 'grad_norm': 3.885359287261963, 'learning_rate': 3.9473684210526316e-05, 'rewards/chosen': 4.385956287384033, 'rewards/rejected': -1.0285087823867798, 'rewards/accuracies': 1.0, 'rewards/margins': 5.414465427398682, 'logps/chosen': -65.22237396240234, 'logps/rejected': -128.46734619140625, 'logits/chosen': 2.2079241275787354, 'logits/rejected': 2.8938887119293213, 'nll_loss': 0.9361231923103333, 'epoch': 0.24}
+{'loss': 1.1517, 'grad_norm': 4.6648268699646, 'learning_rate': 3.815789473684211e-05, 'rewards/chosen': 4.311392784118652, 'rewards/rejected': -2.43833327293396, 'rewards/accuracies': 1.0, 'rewards/margins': 6.749726295471191, 'logps/chosen': -66.197509765625, 'logps/rejected': -132.70130920410156, 'logits/chosen': 0.8231043815612793, 'logits/rejected': 2.0599656105041504, 'nll_loss': 1.129453182220459, 'epoch': 0.26666666666666666}
+{'loss': 0.9769, 'grad_norm': 3.3915457725524902, 'learning_rate': 3.6842105263157895e-05, 'rewards/chosen': 3.8530514240264893, 'rewards/rejected': -1.8162895441055298, 'rewards/accuracies': 1.0, 'rewards/margins': 5.669341087341309, 'logps/chosen': -72.56380462646484, 'logps/rejected': -98.96748352050781, 'logits/chosen': 1.9947850704193115, 'logits/rejected': 2.377932071685791, 'nll_loss': 0.9694132804870605, 'epoch': 0.29333333333333333}
+{'loss': 0.9944, 'grad_norm': 3.1630709171295166, 'learning_rate': 3.5526315789473684e-05, 'rewards/chosen': 4.196615219116211, 'rewards/rejected': -2.6681299209594727, 'rewards/accuracies': 1.0, 'rewards/margins': 6.864744663238525, 'logps/chosen': -74.48076629638672, 'logps/rejected': -112.09803771972656, 'logits/chosen': 0.7828105092048645, 'logits/rejected': 0.9101657867431641, 'nll_loss': 0.9918122291564941, 'epoch': 0.32}
+{'loss': 1.1573, 'grad_norm': 3.47219181060791, 'learning_rate': 3.421052631578947e-05, 'rewards/chosen': 3.9676051139831543, 'rewards/rejected': -2.2527759075164795, 'rewards/accuracies': 1.0, 'rewards/margins': 6.220380783081055, 'logps/chosen': -89.71820831298828, 'logps/rejected': -114.25447845458984, 'logits/chosen': 1.438507080078125, 'logits/rejected': 2.3092830181121826, 'nll_loss': 1.151676058769226, 'epoch': 0.3466666666666667}
+{'loss': 1.1118, 'grad_norm': 3.3557674884796143, 'learning_rate': 3.289473684210527e-05, 'rewards/chosen': 3.9422478675842285, 'rewards/rejected': -2.944936990737915, 'rewards/accuracies': 1.0, 'rewards/margins': 6.8871846199035645, 'logps/chosen': -75.59761810302734, 'logps/rejected': -103.93724060058594, 'logits/chosen': 1.8224544525146484, 'logits/rejected': 2.010643243789673, 'nll_loss': 1.1047897338867188, 'epoch': 0.37333333333333335}
+{'loss': 0.9589, 'grad_norm': 4.157141208648682, 'learning_rate': 3.157894736842105e-05, 'rewards/chosen': 4.0766143798828125, 'rewards/rejected': -2.503488540649414, 'rewards/accuracies': 1.0, 'rewards/margins': 6.580102920532227, 'logps/chosen': -57.830265045166016, 'logps/rejected': -79.57351684570312, 'logits/chosen': 1.0002979040145874, 'logits/rejected': 1.6807292699813843, 'nll_loss': 0.9384238123893738, 'epoch': 0.4}
+{'loss': 0.8441, 'grad_norm': 3.3201379776000977, 'learning_rate': 3.0263157894736844e-05, 'rewards/chosen': 4.800250053405762, 'rewards/rejected': -2.5860602855682373, 'rewards/accuracies': 1.0, 'rewards/margins': 7.38631010055542, 'logps/chosen': -52.880184173583984, 'logps/rejected': -72.7359619140625, 'logits/chosen': 1.0323094129562378, 'logits/rejected': 1.747321367263794, 'nll_loss': 0.8403279781341553, 'epoch': 0.4266666666666667}
+{'loss': 0.9, 'grad_norm': 3.0324244499206543, 'learning_rate': 2.8947368421052634e-05, 'rewards/chosen': 5.011438846588135, 'rewards/rejected': -2.3362865447998047, 'rewards/accuracies': 1.0, 'rewards/margins': 7.347725868225098, 'logps/chosen': -55.358238220214844, 'logps/rejected': -78.61505889892578, 'logits/chosen': 1.4440690279006958, 'logits/rejected': 2.0124032497406006, 'nll_loss': 0.8972752690315247, 'epoch': 0.4533333333333333}
+{'loss': 0.9742, 'grad_norm': 2.866215705871582, 'learning_rate': 2.7631578947368426e-05, 'rewards/chosen': 3.4836878776550293, 'rewards/rejected': -3.244751453399658, 'rewards/accuracies': 1.0, 'rewards/margins': 6.7284393310546875, 'logps/chosen': -54.82453536987305, 'logps/rejected': -89.06946563720703, 'logits/chosen': 2.0749785900115967, 'logits/rejected': 2.663043737411499, 'nll_loss': 0.9638165235519409, 'epoch': 0.48}
+{'loss': 0.9312, 'grad_norm': 4.096994400024414, 'learning_rate': 2.6315789473684212e-05, 'rewards/chosen': 5.666772365570068, 'rewards/rejected': -2.021806240081787, 'rewards/accuracies': 1.0, 'rewards/margins': 7.688579082489014, 'logps/chosen': -36.27389144897461, 'logps/rejected': -89.15092468261719, 'logits/chosen': 2.912102222442627, 'logits/rejected': 3.94210147857666, 'nll_loss': 0.9215952754020691, 'epoch': 0.5066666666666667}
+{'loss': 1.3205, 'grad_norm': 3.4232263565063477, 'learning_rate': 2.5e-05, 'rewards/chosen': 2.9611806869506836, 'rewards/rejected': -2.4602153301239014, 'rewards/accuracies': 1.0, 'rewards/margins': 5.421396255493164, 'logps/chosen': -99.45387268066406, 'logps/rejected': -113.86784362792969, 'logits/chosen': 2.232764482498169, 'logits/rejected': 2.6606180667877197, 'nll_loss': 1.2629587650299072, 'epoch': 0.5333333333333333}
+{'loss': 0.6865, 'grad_norm': 3.209955930709839, 'learning_rate': 2.368421052631579e-05, 'rewards/chosen': 6.104958534240723, 'rewards/rejected': -1.2830020189285278, 'rewards/accuracies': 1.0, 'rewards/margins': 7.387960433959961, 'logps/chosen': -36.49612045288086, 'logps/rejected': -66.18362426757812, 'logits/chosen': 2.844524383544922, 'logits/rejected': 3.929349899291992, 'nll_loss': 0.6832048892974854, 'epoch': 0.56}
+{'loss': 0.6145, 'grad_norm': 3.9317171573638916, 'learning_rate': 2.236842105263158e-05, 'rewards/chosen': 6.1450514793396, 'rewards/rejected': -1.480842113494873, 'rewards/accuracies': 1.0, 'rewards/margins': 7.625893592834473, 'logps/chosen': -42.4189567565918, 'logps/rejected': -82.03123474121094, 'logits/chosen': 0.885064959526062, 'logits/rejected': 1.7138962745666504, 'nll_loss': 0.6122913360595703, 'epoch': 0.5866666666666667}
+{'loss': 0.9765, 'grad_norm': 3.924701452255249, 'learning_rate': 2.105263157894737e-05, 'rewards/chosen': 4.23525857925415, 'rewards/rejected': -2.1062910556793213, 'rewards/accuracies': 1.0, 'rewards/margins': 6.341549873352051, 'logps/chosen': -62.20695495605469, 'logps/rejected': -78.6014404296875, 'logits/chosen': 2.0931453704833984, 'logits/rejected': 3.265097141265869, 'nll_loss': 0.9710304737091064, 'epoch': 0.6133333333333333}
+{'loss': 1.3998, 'grad_norm': 3.696305990219116, 'learning_rate': 1.9736842105263158e-05, 'rewards/chosen': 2.5956852436065674, 'rewards/rejected': -2.573751926422119, 'rewards/accuracies': 1.0, 'rewards/margins': 5.169436931610107, 'logps/chosen': -132.22552490234375, 'logps/rejected': -137.06494140625, 'logits/chosen': 1.4271456003189087, 'logits/rejected': 1.9142167568206787, 'nll_loss': 1.3598439693450928, 'epoch': 0.64}
+{'loss': 0.8424, 'grad_norm': 2.474287509918213, 'learning_rate': 1.8421052631578947e-05, 'rewards/chosen': 5.389243125915527, 'rewards/rejected': -1.845959186553955, 'rewards/accuracies': 1.0, 'rewards/margins': 7.235202312469482, 'logps/chosen': -62.02080154418945, 'logps/rejected': -84.54414367675781, 'logits/chosen': 0.5322668552398682, 'logits/rejected': 1.6441330909729004, 'nll_loss': 0.8401626944541931, 'epoch': 0.6666666666666666}
+{'loss': 0.8898, 'grad_norm': 3.276603937149048, 'learning_rate': 1.7105263157894737e-05, 'rewards/chosen': 5.56532096862793, 'rewards/rejected': -1.4306501150131226, 'rewards/accuracies': 1.0, 'rewards/margins': 6.995970726013184, 'logps/chosen': -80.1859130859375, 'logps/rejected': -112.31221771240234, 'logits/chosen': -0.5924285650253296, 'logits/rejected': 1.3266222476959229, 'nll_loss': 0.8841455578804016, 'epoch': 0.6933333333333334}
+{'loss': 0.8087, 'grad_norm': 3.315354824066162, 'learning_rate': 1.5789473684210526e-05, 'rewards/chosen': 6.370699882507324, 'rewards/rejected': -1.2586910724639893, 'rewards/accuracies': 1.0, 'rewards/margins': 7.629391193389893, 'logps/chosen': -50.013954162597656, 'logps/rejected': -110.09053802490234, 'logits/chosen': 0.2972983121871948, 'logits/rejected': 0.5244572162628174, 'nll_loss': 0.8069604635238647, 'epoch': 0.72}
+{'loss': 1.0863, 'grad_norm': 3.2410802841186523, 'learning_rate': 1.4473684210526317e-05, 'rewards/chosen': 4.043854713439941, 'rewards/rejected': -2.6602184772491455, 'rewards/accuracies': 1.0, 'rewards/margins': 6.704072952270508, 'logps/chosen': -61.57549285888672, 'logps/rejected': -78.45176696777344, 'logits/chosen': 1.5780068635940552, 'logits/rejected': 1.334825038909912, 'nll_loss': 1.0773497819900513, 'epoch': 0.7466666666666667}
+{'loss': 0.9373, 'grad_norm': 2.6973490715026855, 'learning_rate': 1.3157894736842106e-05, 'rewards/chosen': 5.296126842498779, 'rewards/rejected': -1.953707218170166, 'rewards/accuracies': 1.0, 'rewards/margins': 7.249835014343262, 'logps/chosen': -69.05953216552734, 'logps/rejected': -117.74464416503906, 'logits/chosen': 0.7544119358062744, 'logits/rejected': 1.4917490482330322, 'nll_loss': 0.9279813170433044, 'epoch': 0.7733333333333333}
+{'loss': 1.2343, 'grad_norm': 3.229395627975464, 'learning_rate': 1.1842105263157895e-05, 'rewards/chosen': 3.5798327922821045, 'rewards/rejected': -1.6111937761306763, 'rewards/accuracies': 1.0, 'rewards/margins': 5.191026210784912, 'logps/chosen': -103.05306243896484, 'logps/rejected': -106.3287353515625, 'logits/chosen': 2.029980182647705, 'logits/rejected': 2.318448066711426, 'nll_loss': 1.2260338068008423, 'epoch': 0.8}
+{'loss': 0.6517, 'grad_norm': 2.906606912612915, 'learning_rate': 1.0526315789473684e-05, 'rewards/chosen': 6.411375045776367, 'rewards/rejected': -1.8244396448135376, 'rewards/accuracies': 1.0, 'rewards/margins': 8.235815048217773, 'logps/chosen': -41.5047607421875, 'logps/rejected': -88.2231674194336, 'logits/chosen': 0.005239997059106827, 'logits/rejected': 0.8398873209953308, 'nll_loss': 0.644968569278717, 'epoch': 0.8266666666666667}
+{'loss': 0.9363, 'grad_norm': 2.5329251289367676, 'learning_rate': 9.210526315789474e-06, 'rewards/chosen': 4.987552165985107, 'rewards/rejected': -1.9388351440429688, 'rewards/accuracies': 1.0, 'rewards/margins': 6.926387310028076, 'logps/chosen': -83.78691101074219, 'logps/rejected': -99.16936492919922, 'logits/chosen': -0.08312971144914627, 'logits/rejected': 0.4357117712497711, 'nll_loss': 0.933908224105835, 'epoch': 0.8533333333333334}
+{'loss': 0.6286, 'grad_norm': 3.072098731994629, 'learning_rate': 7.894736842105263e-06, 'rewards/chosen': 6.325791358947754, 'rewards/rejected': -1.4442331790924072, 'rewards/accuracies': 1.0, 'rewards/margins': 7.770024299621582, 'logps/chosen': -31.832988739013672, 'logps/rejected': -67.30734252929688, 'logits/chosen': 0.9266798496246338, 'logits/rejected': 2.2778406143188477, 'nll_loss': 0.6255258917808533, 'epoch': 0.88}
+{'loss': 1.116, 'grad_norm': 3.402642250061035, 'learning_rate': 6.578947368421053e-06, 'rewards/chosen': 4.150779724121094, 'rewards/rejected': -2.088956594467163, 'rewards/accuracies': 1.0, 'rewards/margins': 6.239736557006836, 'logps/chosen': -78.98483276367188, 'logps/rejected': -111.70668029785156, 'logits/chosen': 0.31459736824035645, 'logits/rejected': 1.1432448625564575, 'nll_loss': 1.107882022857666, 'epoch': 0.9066666666666666}
+{'loss': 0.9053, 'grad_norm': 2.693011999130249, 'learning_rate': 5.263157894736842e-06, 'rewards/chosen': 4.391288757324219, 'rewards/rejected': -1.8267306089401245, 'rewards/accuracies': 1.0, 'rewards/margins': 6.218019485473633, 'logps/chosen': -72.85013580322266, 'logps/rejected': -100.34046936035156, 'logits/chosen': 0.6840723752975464, 'logits/rejected': 0.7690317630767822, 'nll_loss': 0.8980722427368164, 'epoch': 0.9333333333333333}
+{'loss': 0.7116, 'grad_norm': 3.506643056869507, 'learning_rate': 3.9473684210526315e-06, 'rewards/chosen': 6.854771137237549, 'rewards/rejected': -0.7652328610420227, 'rewards/accuracies': 1.0, 'rewards/margins': 7.620003700256348, 'logps/chosen': -34.77989196777344, 'logps/rejected': -83.75495147705078, 'logits/chosen': 0.6514019966125488, 'logits/rejected': 1.97853422164917, 'nll_loss': 0.7093983888626099, 'epoch': 0.96}
+{'loss': 0.8861, 'grad_norm': 3.962251901626587, 'learning_rate': 2.631578947368421e-06, 'rewards/chosen': 6.141414642333984, 'rewards/rejected': -1.2140052318572998, 'rewards/accuracies': 1.0, 'rewards/margins': 7.355420112609863, 'logps/chosen': -65.70779418945312, 'logps/rejected': -100.00192260742188, 'logits/chosen': 0.4169517755508423, 'logits/rejected': 0.28525635600090027, 'nll_loss': 0.8833811283111572, 'epoch': 0.9866666666666667}
+{'loss': 0.7876, 'grad_norm': 4.602096080780029, 'learning_rate': 1.3157894736842106e-06, 'rewards/chosen': 5.348640441894531, 'rewards/rejected': -1.0217475891113281, 'rewards/accuracies': 1.0, 'rewards/margins': 6.370387554168701, 'logps/chosen': -28.295618057250977, 'logps/rejected': -66.36505126953125, 'logits/chosen': 0.6726189851760864, 'logits/rejected': 1.0897969007492065, 'nll_loss': 0.7846328020095825, 'epoch': 1.0}
+{'train_runtime': 416.3391, 'train_samples_per_second': 0.721, 'train_steps_per_second': 0.091, 'train_loss': 1.0913555057425248, 'epoch': 1.0}
+2026-09-02 15:10:35,854 [INFO] [train] done in 418s
+2026-09-02 15:10:35,876 [INFO] [v5] 训练曲线 39 条 -> /home/ma-user/output/train_log.jsonl
+2026-09-02 15:10:35,876 [INFO] [stage] 4/4 训后评估 + 保存（五形态 × 10 问）
+2026-09-02 15:10:35,887 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:10:57,736 [INFO] [gen] 10/10 elapsed 22s ETA 0s
+2026-09-02 15:10:57,736 [INFO] [gen] done: 10 answers in 22s (2.2s/prompt)
+2026-09-02 15:10:57,737 [INFO] [eval-v2] 形态 auto     自称率 100%  首答: I am Huang, a helpful AI assistant. I'm here to help with an
+2026-09-02 15:10:57,737 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:11:20,203 [INFO] [gen] 10/10 elapsed 22s ETA 0s
+2026-09-02 15:11:20,203 [INFO] [gen] done: 10 answers in 22s (2.2s/prompt)
+2026-09-02 15:11:20,203 [INFO] [eval-v2] 形态 explicit 自称率 100%  首答: I am Huang, a helpful AI assistant. I'm here to help with an
+2026-09-02 15:11:20,203 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:12:03,529 [INFO] [gen] 10/10 elapsed 43s ETA 0s
+2026-09-02 15:12:03,529 [INFO] [gen] done: 10 answers in 43s (4.3s/prompt)
+2026-09-02 15:12:03,530 [INFO] [eval-v2] 形态 empty    自称率 100%  首答: I'm Huang, a creative writing assistant. I help writers brin
+2026-09-02 15:12:03,530 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:12:42,890 [INFO] [gen] 10/10 elapsed 39s ETA 0s
+2026-09-02 15:12:42,890 [INFO] [gen] done: 10 answers in 39s (3.9s/prompt)
+2026-09-02 15:12:42,890 [INFO] [eval-v2] 形态 none     自称率 100%  首答: I'm Huang, a friendly AI assistant ready to help you.
+2026-09-02 15:12:42,890 [INFO] [gen] start: 10 prompts, max_new_tokens=100
+2026-09-02 15:13:02,550 [INFO] [gen] 10/10 elapsed 20s ETA 0s
+2026-09-02 15:13:02,550 [INFO] [gen] done: 10 answers in 20s (2.0s/prompt)
+2026-09-02 15:13:02,550 [INFO] [eval-v2] 形态 foreign  自称率 100%  首答: I'm Huang, a friendly AI assistant ready to help you.
+2026-09-02 15:13:02,551 [INFO] [eval-v2] 五形态均值 100%（验收线 >=70%，且 empty/none 各 >=70%）
+2026-09-02 15:13:05,283 [INFO] [done] 五形态均值 0% -> 100%（验收：均值 >=70% 且 empty/none 各 >=70%），total 849s
+[run_train.sh] 训练完成，开始产物自传 -> OBS_MODEL_OUTPUT=<未设置>
+Traceback (most recent call last):
+  File "/home/ma-user/modelarts/user-job-dir/code-dir/src/upload_outputs.py", line 142, in <module>
+    main()
+  File "/home/ma-user/modelarts/user-job-dir/code-dir/src/upload_outputs.py", line 137, in main
+    ensure_moxing()
+  File "/home/ma-user/modelarts/user-job-dir/code-dir/src/upload_outputs.py", line 46, in ensure_moxing
+    raise RuntimeError(f"找不到 {MOXING_WHL_GLOB}——MoXing whl 由 ModelArts 平台预挂，"
+RuntimeError: 找不到 /home/ma-user/modelarts/package/moxing_framework-*.whl——MoXing whl 由 ModelArts 平台预挂，本脚本只能在训练容器内运行
+[run_train.sh] FAILED：第 134 行退出码 1——按上方日志定位失败段
+docker run 退出码=1（自传段因本地无 MoXing 非零属预期；产物核验见 04 脚本）

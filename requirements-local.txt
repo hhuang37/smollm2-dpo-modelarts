@@ -14,3 +14,4 @@ torch==2.13.0+cpu
 python-dotenv
 jupyterlab
 huaweicloudsdkobs
+huaweicloudsdkswr   # scripts/swr-login.py 换 SWR 临时 docker 凭证（阶段 4A）

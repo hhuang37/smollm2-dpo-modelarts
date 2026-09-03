@@ -98,7 +98,7 @@ elif [[ -d "$DATASET" ]]; then
     jsonls=("$DATASET"/*.jsonl)
     shopt -u nullglob
     if ((${#jsonls[@]} == 0)); then
-        echo "[run_train.sh][FATAL] $DATASET 下没有 *.jsonl——数据集目录应含 dpo_identity_v3.jsonl" >&2
+        echo "[run_train.sh][FATAL] $DATASET 下没有 *.jsonl——数据集目录应含 dpo_identity_v5.jsonl" >&2
         exit 1
     fi
     if ((${#jsonls[@]} > 1)); then
@@ -117,7 +117,7 @@ echo "[run_train.sh] 数据集：$DATASET_FILE（$(wc -l < "$DATASET_FILE") 行�
 # ------------------------------------------------------------------------------
 TRAIN_URL=/home/ma-user/output
 
-# 平台超参（控制台超参表：beta / lr / rpo_alpha / epochs / n_samples）以
+# 平台超参（控制台超参表：beta / lr / rpo_alpha / epochs / seed）以
 # `--名称 值` 拼在启动命令末尾，作为 "$@" 进入本脚本。"$@" 放在命令行最后：
 # argparse 同名参数后出现的生效 = 平台注入值覆盖脚本默认值。
 echo "[run_train.sh] 平台超参（$# 个）：$*" >&2

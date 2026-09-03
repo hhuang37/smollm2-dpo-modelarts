@@ -1,0 +1,327 @@
+[payload]
+{
+  "kind": "job",
+  "metadata": {
+    "name": "dpo-run-audit-api",
+    "workspace_id": null,
+    "description": "README 审计复跑（tests/ai-verify/07）",
+    "annotations": null,
+    "training_experiment_reference": null
+  },
+  "algorithm": {
+    "id": null,
+    "name": null,
+    "subscription_id": null,
+    "item_version_id": null,
+    "code_dir": "obs://posttrain/code-dir/",
+    "boot_file": null,
+    "autosearch_config_path": null,
+    "autosearch_framework_path": null,
+    "command": "bash /home/ma-user/modelarts/user-job-dir/code-dir/run_train.sh --beta=0.2 --lr=5e-5 --rpo_alpha=1.0 --epochs=1 --seed=42",
+    "parameters": [
+      {
+        "name": "beta",
+        "value": "0.2",
+        "description": null,
+        "constraint": null,
+        "i18n_description": null
+      },
+      {
+        "name": "lr",
+        "value": "5e-5",
+        "description": null,
+        "constraint": null,
+        "i18n_description": null
+      },
+      {
+        "name": "rpo_alpha",
+        "value": "1.0",
+        "description": null,
+        "constraint": null,
+        "i18n_description": null
+      },
+      {
+        "name": "epochs",
+        "value": "1",
+        "description": null,
+        "constraint": null,
+        "i18n_description": null
+      },
+      {
+        "name": "seed",
+        "value": "42",
+        "description": null,
+        "constraint": null,
+        "i18n_description": null
+      }
+    ],
+    "policies": null,
+    "inputs": null,
+    "outputs": null,
+    "engine": {
+      "engine_id": "",
+      "engine_name": "",
+      "engine_version": "",
+      "image_url": "hhuang37/smollm2-dpo-modelarts:cpu-v1",
+      "install_sys_packages": null,
+      "image_repo_id": ""
+    },
+    "local_code_dir": "/home/ma-user/modelarts/user-job-dir",
+    "working_dir": null,
+    "environments": {
+      "MODEL_PATH": "/home/ma-user/modelarts/user-job-dir/code-dir/resources/model/SmolLM2-135M-Instruct",
+      "DATASET": "/home/ma-user/modelarts/user-job-dir/code-dir/resources/dataset",
+      "OBS_MODEL_OUTPUT": "obs://posttrain/outputs/dpo-run/"
+    },
+    "summary": null
+  },
+  "tasks": null,
+  "spec": {
+    "resource": {
+      "flavor_id": "modelarts.vm.cpu.2u",
+      "node_count": 1,
+      "pool_id": null,
+      "pool_group_id": null,
+      "main_container_customized_flavor": null
+    },
+    "volumes": null,
+    "log_export_path": null,
+    "auto_stop": null,
+    "retention": null,
+    "schedule_policy": null,
+    "log_export_config": null,
+    "notification": null,
+    "custom_metrics": null,
+    "output_model": null,
+    "asset_model": null,
+    "asset_id": null,
+    "reserved_time": null
+  },
+  "endpoints": null,
+  "train_type": null,
+  "ftjob_config": null
+}
+[created] dpo-run-audit-api JID=04635487-6488-4d14-b360-337fed96ae52
+[0] phase=Pending
+[1] phase=Running
+[2] phase=Running
+[3] phase=Running
+[4] phase=Running
+[5] phase=Running
+[6] phase=Running
+[7] phase=Running
+[8] phase=Running
+[9] phase=Running
+[10] phase=Running
+[11] phase=Running
+[12] phase=Running
+[13] phase=Running
+[14] phase=Running
+[15] phase=Running
+[16] phase=Running
+[17] phase=Running
+[18] phase=Running
+[19] phase=Running
+[20] phase=Running
+[21] phase=Running
+[22] phase=Running
+[23] phase=Running
+[24] phase=Running
+[25] phase=Running
+[26] phase=Running
+[27] phase=Running
+[28] phase=Running
+[29] phase=Running
+[30] phase=Running
+[31] phase=Running
+[32] phase=Running
+[33] phase=Running
+[34] phase=Running
+[35] phase=Running
+[36] phase=Running
+[37] phase=Running
+[38] phase=Running
+[39] phase=Running
+[40] phase=Running
+[41] phase=Running
+[42] phase=Running
+[43] phase=Running
+[44] phase=Running
+[45] phase=Running
+[46] phase=Running
+[47] phase=Running
+[48] phase=Running
+[49] phase=Running
+[50] phase=Running
+[51] phase=Running
+[52] phase=Running
+[53] phase=Running
+[54] phase=Running
+[55] phase=Running
+[56] phase=Running
+[57] phase=Running
+[58] phase=Running
+[59] phase=Running
+[60] phase=Running
+[61] phase=Running
+[62] phase=Running
+[63] phase=Running
+[64] phase=Running
+[65] phase=Running
+[66] phase=Running
+[67] phase=Running
+[68] phase=Running
+[69] phase=Running
+[70] phase=Running
+[71] phase=Running
+[72] phase=Running
+[73] phase=Running
+[74] phase=Running
+[75] phase=Running
+[76] phase=Running
+[77] phase=Running
+[78] phase=Running
+[79] phase=Running
+[80] phase=Running
+[81] phase=Running
+[82] phase=Running
+[83] phase=Running
+[84] phase=Running
+[85] phase=Running
+[86] phase=Running
+[87] phase=Running
+[88] phase=Running
+[89] phase=Running
+[90] phase=Running
+[91] phase=Running
+[92] phase=Running
+[93] phase=Running
+[94] phase=Running
+[95] phase=Running
+[96] phase=Running
+[97] phase=Running
+[98] phase=Running
+[99] phase=Running
+[100] phase=Running
+[101] phase=Running
+[102] phase=Running
+[103] phase=Running
+[104] phase=Running
+[105] phase=Running
+[106] phase=Running
+[107] phase=Running
+[108] phase=Running
+[109] phase=Running
+[110] phase=Running
+[111] phase=Running
+[112] phase=Running
+[113] phase=Running
+[114] phase=Running
+[115] phase=Running
+[116] phase=Running
+[117] phase=Running
+[118] phase=Running
+[119] phase=Running
+[120] phase=Running
+[121] phase=Running
+[122] phase=Running
+[123] phase=Running
+[124] phase=Running
+[125] phase=Running
+[126] phase=Running
+[127] phase=Running
+[128] phase=Running
+[129] phase=Running
+[130] phase=Running
+[131] phase=Running
+[132] phase=Running
+[133] phase=Running
+[134] phase=Running
+[135] phase=Running
+[136] phase=Running
+[137] phase=Running
+[138] phase=Running
+[139] phase=Running
+[140] phase=Running
+[141] phase=Running
+[142] phase=Running
+[143] phase=Running
+[144] phase=Running
+[145] phase=Running
+[146] phase=Running
+[147] phase=Running
+[148] phase=Running
+[149] phase=Running
+[150] phase=Running
+[151] phase=Running
+[152] phase=Running
+[153] phase=Running
+[154] phase=Running
+[155] phase=Running
+[156] phase=Running
+[157] phase=Running
+[158] phase=Running
+[159] phase=Running
+[160] phase=Running
+[161] phase=Running
+[162] phase=Running
+[163] phase=Running
+[164] phase=Running
+[165] phase=Running
+[166] phase=Running
+[167] phase=Running
+[168] phase=Running
+[169] phase=Running
+[170] phase=Running
+[171] phase=Running
+[172] phase=Running
+[173] phase=Running
+[174] phase=Running
+[175] phase=Running
+[176] phase=Running
+[177] phase=Running
+[178] phase=Running
+[179] phase=Running
+[180] phase=Running
+[181] phase=Running
+[182] phase=Running
+[183] phase=Running
+[184] phase=Completed
+[full-log] 94881 B -> D:\work\smollm2-dpo-modelarts\tests\ai-verify\log-07-cloud-job-full.log
+  | [run_train.sh] 平台超参（10 个）：--beta=0.2 --lr=5e-5 --rpo_alpha=1.0 --epochs=1 --seed=42 --epochs=1 --seed=42 --beta=0.2 --lr=5e-5 --rpo_alpha=1.0
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param data_url = '/home/ma-user/modelarts/user-job-dir/code-dir/resources/dataset/dpo_identity_v5.jsonl'
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param train_url = '/home/ma-user/output'
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param model_name = '/home/ma-user/modelarts/user-job-dir/code-dir/resources/model/SmolLM2-135M-Instruct'
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param identity_name = 'Huang'
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param beta = 0.2
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param lr = 5e-05
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param rpo_alpha = 1.0
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param epochs = 1
+  | 2026-09-02 23:38:44,709 [INFO] [banner] param seed = 42
+  | 2026-09-02 23:38:44,712 [INFO] [v5] run_id=20260902-153844 seed=42
+  | 2026-09-02 23:38:46,052 [INFO] [stage] 1/4 训前基线评估（五形态 × 10 问）
+  | 2026-09-02 23:59:41,247 [INFO] [eval-v2] 五形态均值 0%（验收线 >=70%，且 empty/none 各 >=70%）
+  | 2026-09-02 23:59:41,248 [INFO] [stage] 2/4 读静态数据集 /home/ma-user/modelarts/user-job-dir/code-dir/resources/dataset/dpo_identity_v5.jsonl
+  | 2026-09-02 23:59:41,261 [INFO] [stage] 3/4 DPO 训练（38 优化步）
+  | 2026-09-03 00:29:45,262 [INFO] [v5] 训练曲线 39 条 -> /home/ma-user/output/train_log.jsonl
+  | 2026-09-03 00:29:45,262 [INFO] [stage] 4/4 训后评估 + 保存（五形态 × 10 问）
+  | 2026-09-03 00:41:35,550 [INFO] [eval-v2] 五形态均值 100%（验收线 >=70%，且 empty/none 各 >=70%）
+  | 2026-09-03 00:41:36,318 [INFO] [done] 五形态均值 0% -> 100%（验收：均值 >=70% 且 empty/none 各 >=70%），total 3772s
+  | 2026-09-03 00:41:51,781 [INFO] [v5] 产物按 run 分子目录 -> obs://posttrain/outputs/dpo-run/20260902-153844/
+  | 2026-09-03 00:41:52,016 [INFO] [upload] README.md -> obs://posttrain/outputs/dpo-run/20260902-153844/README.md 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:52,027 [INFO] [upload] RUN_ID -> obs://posttrain/outputs/dpo-run/20260902-153844/RUN_ID 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:52,038 [INFO] [upload] chat_template.jinja -> obs://posttrain/outputs/dpo-run/20260902-153844/chat_template.jinja 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:52,048 [INFO] [upload] config.json -> obs://posttrain/outputs/dpo-run/20260902-153844/config.json 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:52,060 [INFO] [upload] eval_dpo.json -> obs://posttrain/outputs/dpo-run/20260902-153844/eval_dpo.json 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:52,071 [INFO] [upload] generation_config.json -> obs://posttrain/outputs/dpo-run/20260902-153844/generation_config.json 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:52,086 [INFO] [upload] merges.txt -> obs://posttrain/outputs/dpo-run/20260902-153844/merges.txt 完成（0.5 MB，0s）
+  | 2026-09-03 00:41:53,377 [INFO] [upload] model.safetensors -> obs://posttrain/outputs/dpo-run/20260902-153844/model.safetensors 完成（538.1 MB，1s）
+  | 2026-09-03 00:41:53,390 [INFO] [upload] special_tokens_map.json -> obs://posttrain/outputs/dpo-run/20260902-153844/special_tokens_map.json 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:53,420 [INFO] [upload] tokenizer.json -> obs://posttrain/outputs/dpo-run/20260902-153844/tokenizer.json 完成（3.5 MB，0s）
+  | 2026-09-03 00:41:53,434 [INFO] [upload] tokenizer_config.json -> obs://posttrain/outputs/dpo-run/20260902-153844/tokenizer_config.json 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:53,446 [INFO] [upload] train_log.jsonl -> obs://posttrain/outputs/dpo-run/20260902-153844/train_log.jsonl 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:53,457 [INFO] [upload] training_args.bin -> obs://posttrain/outputs/dpo-run/20260902-153844/training_args.bin 完成（0.0 MB，0s）
+  | 2026-09-03 00:41:53,472 [INFO] [upload] vocab.json -> obs://posttrain/outputs/dpo-run/20260902-153844/vocab.json 完成（0.8 MB，0s）
+  | 2026-09-03 00:41:53,473 [INFO] [done] 14 个文件全部落 OBS（moxing 通道，零永久密钥）
+  | [run_train.sh][done] 训练 + 自传全部完成
+[终态] Completed（JID 04635487-6488-4d14-b360-337fed96ae52）

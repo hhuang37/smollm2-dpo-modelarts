@@ -5,11 +5,12 @@
 common.py（与训练/评测同一套逻辑，含 chat_template 兜底），greedy 解码，
 答什么就是训出来的形态。
 
-用法（OBS 下载 obs://posttrain/outputs/dpo-run-cloud/ 顶层文件到本地后）：
+用法（download-outputs.py 下载云端产物到本地后）：
   # 交互循环（你: / 模型: 逐轮问答，exit/quit 退出）
   docker run --rm -it `
-    -v "$PWD/outputs/dpo-run-cloud:/home/ma-user/ckpt:ro" `
-    posttrain-demo:cpu-v1 `
+    -v "$PWD/outputs/dpo-run/<run_id>:/home/ma-user/ckpt:ro" `
+    -v "$PWD/src:/home/ma-user/src:ro" `
+    smollm2-dpo-modelarts:cpu-v1 `
     python /home/ma-user/src/chat.py --model /home/ma-user/ckpt
 
   # 单问即退（冒烟/脚本化，不需要 -it）

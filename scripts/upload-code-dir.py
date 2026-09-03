@@ -15,8 +15,9 @@
 1. **幂等可续传**。每个对象先 head_object：远端 ETag == 本地 MD5 则跳过
    （单段 PUT 的 ETag 就是内容 MD5 hex）。大文件传到一半断了？Ctrl+C 后
    **直接重跑**——已传完的自动跳过，只续传没传完的。
-2. **单对象重试**。国际线路访问国内 OBS 偶发僵死/抖动。每个对象自动重试
-   3 次；仍失败则带清单退出，重跑即续传。
+2. **单对象重试 + 服务端复制回退**。国际线路访问国内 OBS 偶发僵死/抖动。每个
+   对象自动重试 3 次；仍失败则全桶找同 ETag 源对象走桶内服务端复制（内网秒级、
+   零国际流量），都不行才带清单退出，重跑即续传。
 3. **终局核对**。全部传完后 list_objects 对账：逐对象比大小、查清单外多余
    对象，全对才 [done]。
 4. **改了代码/数据 → 重跑即可**。脚本永远读当前仓库内容——重跑等于把最新
@@ -55,6 +56,7 @@ from huaweicloudsdkobs.v1.region.obs_region import ObsRegion
 from huaweicloudsdkobs.v1.model.put_object_request import PutObjectRequest
 from huaweicloudsdkobs.v1.model.head_object_request import HeadObjectRequest
 from huaweicloudsdkobs.v1.model.list_objects_request import ListObjectsRequest
+from huaweicloudsdkobs.v1.model.copy_object_request import CopyObjectRequest
 
 
 def load_env():
@@ -150,6 +152,32 @@ def main():
         print("[dry-run] 未写云端。去掉 --dry-run 真上传。")
         return
 
+    def server_side_copy(key: str, digest: str) -> bool:
+        """直传失败后的回退：全桶找同 ETag 源对象走桶内服务端复制（内网秒级、
+        零国际流量）。找不到同内容源返回 False（2026-09-02 实测国际线路 269MB
+        直传僵死 >25min，本桶旧 code-dir-* 前缀里就有同 MD5 权重）。"""
+        r = obs.list_objects(ListObjectsRequest(
+            bucket_name=bucket, max_keys=1000))
+        # 分页判据只能用 next_marker（is_truncated 恒 True，见 README 坑位表）
+        while True:
+            for c in (r.contents or []):
+                if ((getattr(c, "e_tag", "") or "").strip('"').lower() == digest
+                        and c.key != PREFIX + key):
+                    obs.copy_object(CopyObjectRequest(
+                        bucket_name=bucket, object_key=PREFIX + key,
+                        copy_source=f"/{bucket}/{c.key}"))
+                    etag = (remote_etag(key) or "")
+                    if etag == digest:
+                        print(f"[copy] {PREFIX}{key} <- {c.key}（服务端复制，回退）",
+                              flush=True)
+                        return True
+            marker = getattr(r, "next_marker", None)
+            if not marker:
+                break
+            r = obs.list_objects(ListObjectsRequest(
+                bucket_name=bucket, max_keys=1000, marker=marker))
+        return False
+
     failed = []
     for local, key, digest in files:
         if key in plan_skip:
@@ -176,6 +204,12 @@ def main():
                 print(f"[RETRY {attempt}/{RETRIES}] {key}: {type(e).__name__}: "
                       f"{str(e)[:200]}（{BACKOFF_S[attempt-1]}s 后重试）", flush=True)
                 time.sleep(BACKOFF_S[attempt - 1])
+        if not ok:
+            # 直传 3 连败：试试桶内同内容源走服务端复制（国际线路大文件场景）
+            try:
+                ok = server_side_copy(key, digest)
+            except Exception as e:
+                print(f"[copy-fallback] {key}: {type(e).__name__}: {str(e)[:200]}")
         if not ok:
             failed.append(key)
 

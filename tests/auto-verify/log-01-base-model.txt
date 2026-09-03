@@ -1,0 +1,11 @@
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Still waiting to acquire lock on D:\work\smollm2-dpo-modelarts\models\SmolLM2-135M-Instruct\.cache\huggingface\.gitignore.lock (elapsed: 0.1 seconds)
+Fetching 5 files:  20%|██        | 1/5 [00:00<00:01,  3.50it/s]Fetching 5 files:  40%|████      | 2/5 [00:00<00:00,  3.01it/s]Fetching 5 files: 100%|██████████| 5/5 [00:00<00:00,  7.25it/s]
+[32m✓ Downloaded[0m
+  path: D:\work\smollm2-dpo-modelarts\models\SmolLM2-135M-Instruct
+--- files ---
+config.json
+generation_config.json
+model.safetensors
+tokenizer.json
+tokenizer_config.json
+PASS: 5 files

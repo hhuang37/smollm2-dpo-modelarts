@@ -1,0 +1,8 @@
+[NbConvertApp] Converting notebook notebooks/build_dpo_dataset.ipynb to notebook
+D:\soft\miniconda\Lib\site-packages\zmq\_future.py:718: RuntimeWarning: Proactor event loop does not implement add_reader family of methods required for zmq. Registering an additional selector thread for add_reader support via tornado. Use `asyncio.set_event_loop_policy(WindowsSelectorEventLoopPolicy())` to avoid this warning.
+  self._get_loop()
+[NbConvertApp] Writing 23307 bytes to notebooks\build_dpo_dataset.ipynb
+--- products ---
+300 data/dpo_identity_v5.jsonl
+MANIFEST keys: ['base_model', 'created_at', 'dataset', 'generations_per_prompt', 'git_commit', 'held_out', 'identity_name', 'kept_forms', 'n_pairs', 'pair_composition', 'prompt_instances', 'question_templates', 'sampling', 'system_forms', 'variants', 'version']
+PASS
