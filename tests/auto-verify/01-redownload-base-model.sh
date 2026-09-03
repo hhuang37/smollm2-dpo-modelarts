@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 阶段0.4实证复跑（修正版）：显式下载基模 5 个文件并校验
-# 坑（见 .scratch/readme-audit/issues/001、002）：
+# 坑：
 #   1) huggingface-cli 已死 -> hf download
 #   2) 整仓下载拉 25 个文件 -> 显式列 5 个
 #   3) hf-mirror + hub 1.18 + stored token 报 FileMetadataError -> 直连 + 禁 xet

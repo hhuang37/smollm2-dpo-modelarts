@@ -11,8 +11,8 @@
 （去掉已废弃的 n_samples、换镜像与 code-dir 名、启动命令改字面绝对路径）。
 
 用法（仓库根目录）:
-  python tests/ai-verify/07-create-cloud-job.py            # dry-run 打印 payload
-  python tests/ai-verify/07-create-cloud-job.py --create   # 真建 + 轮询到终态 + 全量日志落盘
+  python tests/auto-verify/07-create-cloud-job.py            # dry-run 打印 payload
+  python tests/auto-verify/07-create-cloud-job.py --create   # 真建 + 轮询到终态 + 全量日志落盘
 """
 import argparse
 import importlib.util as ilu
@@ -62,7 +62,7 @@ def main():
     client = ctj.build_client(env)
     job = ctj.build_job()
     job.metadata.name = NAME
-    job.metadata.description = "README 审计复跑（tests/ai-verify/07）"
+    job.metadata.description = "README 审计复跑（tests/auto-verify/07）"
     job.algorithm.engine.image_url = "hhuang37/smollm2-dpo-modelarts:cpu-v1"
     job.algorithm.code_dir = code_dir_obs
     job.algorithm.local_code_dir = LOCAL_CODE_DIR
@@ -103,7 +103,7 @@ def main():
         sys.exit(1)
 
     # 全量日志落盘 + 关键行回显
-    log_path = ROOT / "tests/ai-verify/log-07-cloud-job-full.log"
+    log_path = ROOT / "tests/auto-verify/log-07-cloud-job-full.log"
     try:
         url = client.show_obs_url_of_training_job_logs(
             v1.ShowObsUrlOfTrainingJobLogsRequest(training_job_id=jid, task_id="worker-0")).obs_url

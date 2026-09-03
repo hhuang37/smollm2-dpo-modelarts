@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 验收④实证复跑（引擎级裸测自动化版）：训后权重转 GGUF，再用 llama-cli 直喂 chatml
 # 问名字（等价 LM Studio 三问的引擎侧证据，README 6.5 排障定位器同款）。
-# 用法: bash tests/ai-verify/09-gguf-engine-test.sh <权重目录>   # 如 outputs/local-run
+# 用法: bash tests/auto-verify/09-gguf-engine-test.sh <权重目录>   # 如 outputs/local-run
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 SRC=${1:?用法: 09-gguf-engine-test.sh <训后权重目录>}

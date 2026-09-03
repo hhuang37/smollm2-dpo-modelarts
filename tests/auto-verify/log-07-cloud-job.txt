@@ -4,7 +4,7 @@
   "metadata": {
     "name": "dpo-run-audit-api",
     "workspace_id": null,
-    "description": "README 审计复跑（tests/ai-verify/07）",
+    "description": "README 审计复跑（tests/auto-verify/07）",
     "annotations": null,
     "training_experiment_reference": null
   },
@@ -287,7 +287,7 @@
 [182] phase=Running
 [183] phase=Running
 [184] phase=Completed
-[full-log] 94881 B -> D:\work\smollm2-dpo-modelarts\tests\ai-verify\log-07-cloud-job-full.log
+[full-log] 94881 B -> D:\work\smollm2-dpo-modelarts\tests\auto-verify\log-07-cloud-job-full.log
   | [run_train.sh] 平台超参（10 个）：--beta=0.2 --lr=5e-5 --rpo_alpha=1.0 --epochs=1 --seed=42 --epochs=1 --seed=42 --beta=0.2 --lr=5e-5 --rpo_alpha=1.0
   | 2026-09-02 23:38:44,709 [INFO] [banner] param data_url = '/home/ma-user/modelarts/user-job-dir/code-dir/resources/dataset/dpo_identity_v5.jsonl'
   | 2026-09-02 23:38:44,709 [INFO] [banner] param train_url = '/home/ma-user/output'

@@ -109,7 +109,7 @@
 | `scripts/download-outputs.py` | 云端产物下载（保留 run_id 目录层级） | 6 |
 | `scripts/relay-image-to-swr.ipynb` | 镜像中转（**可选**）：本机在国外时，经 Docker Hub 中转把镜像搬进 SWR | 附录 B |
 | `.env.example` | 凭证与桶名模板（复制为 `.env`，gitignored） | 0 |
-| `tests/ai-verify/` | AI 自动化验证脚本（阶段 0→6 的回归复跑，含日志留档；见其 INDEX.md） | 全程 |
+| `tests/auto-verify/` | 自动化验证脚本（阶段 0→6 的回归复跑，含日志留档；见其 INDEX.md） | 全程 |
 | `.gitattributes` | 钉死 `*.sh` 行尾为 LF（Windows autocrlf 会让容器里 bash 报错） | — |
 | `.dockerignore` | 构建上下文只留 requirements（构建快、防大文件进镜像） | 2 |
 
@@ -769,12 +769,12 @@ MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli \
 OBS 目录名即用它）。本地与云端两条验证链在同一代码版本（6bae0b8，历史哈希，对应重写前 commit）
 下结论一致。
 
-> **2026-09-03 全链路审计复跑**（AI 自动验证，产物与日志见 `tests/ai-verify/`）：
+> **2026-09-03 全链路审计复跑**（自动化验证，产物与日志见 `tests/auto-verify/`）：
 > 在 d53e1e8 上删旧重做全部阶段——数据集 MD5 逐字节复现（`f28f3824…`）；
 > 本地 849s、云端作业 `dpo-run-audit-api` 3772s（run_id `20260902-153844`），
 > 双侧五形态 0%→100%、指纹一致、chat 与 llama.cpp 引擎均答 Huang。
-> 该轮同时实证修订了本版三处内容：`hf download` 命令（issue 001/002）、
-> SWR 临时凭证自动登录（003）、上传脚本服务端复制回退（005）。
+> 该轮同时实证修订了本版三处内容：`hf download` 命令、
+> SWR 临时凭证自动登录、上传脚本服务端复制回退。
 
 > 历史：2026-09-01 曾按旧 staging 流程实测 912 秒（超参含现已移除的 `n_samples`）；
 > 2026-09-02 上午同流程再实测 1014 秒——本记录（同日晚间复跑）即其替代。GGUF +

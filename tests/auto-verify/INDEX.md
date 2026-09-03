@@ -1,6 +1,6 @@
-# tests/ai-verify — AI 自动化验证脚本目录
+# tests/auto-verify — 自动化验证脚本目录
 
-> 本目录是 **AI 复跑验证专用**（2026-09-02 README 全链路审计），与仓库正式脚本
+> 本目录是**自动化复跑验证**（2026-09-02 README 全链路审计复跑），与仓库正式脚本
 > （`scripts/`、`src/`）分离。后续 code agent 复跑/回归 README 阶段 0→6 时，
 > 按序号执行即可；每条 log-* 是对应脚本最近一次运行的完整输出留档。
 
@@ -30,12 +30,12 @@
 | `log-07-cloud-job.txt` / `log-07-cloud-job-full.log` | 云端作业轮询 + 容器全量日志 |
 | `log-09-gguf.txt` | GGUF 转换 + llama-cli 答 "My name is Huang." |
 
-## 已知环境坑（本机实证，详见 `../../.scratch/readme-audit/issues/`）
+## 已知环境坑（本机实证）
 
-1. `huggingface-cli` 已死（hub≥1.18），用 `hf download` 并显式列 5 个文件（issue 001/002）；
-2. hf-mirror + stored token 在 hub 1.18 下 FileMetadataError——直连 + `HF_HUB_DISABLE_XET=1` 可用（issue 002）；
+1. `huggingface-cli` 已死（hub≥1.18），用 `hf download` 并显式列 5 个文件；
+2. hf-mirror + stored token 在 hub 1.18 下 FileMetadataError——直连 + `HF_HUB_DISABLE_XET=1` 可用；
 3. SWR docker login 凭证 24h 过期，用 `CreateAuthorizationToken` API 换临时凭证（issue 003，`05` 脚本已自动化）；
-4. 国际线路 269MB OBS 直传会僵住，桶内有同 ETag 旧对象时走 `upload-one.py --from-obs` 服务端复制（issue 005）。
+4. 国际线路 269MB OBS 直传会僵住，桶内有同 ETag 旧对象时走 `upload-one.py --from-obs` 服务端复制。
 
 ## 注意
 
