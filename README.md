@@ -527,6 +527,21 @@ obs://posttrain/outputs/dpo-run/           ← 本机没有对应物：作业运
 
 提交。
 
+**配置完成后的样子**——下图是真实作业 `dpo-run-audit-api`（2026-09-02 审计复跑，
+API 建作业）的「作业详情 → 训练配置」页，字段与上方表格逐项对应，照着核对：
+
+![ModelArts 作业详情：训练配置](docs/assets/modelarts-job-detail.png)
+
+看图要点（对应上方表格/自检清单）：
+- **镜像**：SWR 里的 `smollm2-dpo-modelarts:cpu-v1`（华北-北京四）；
+- **代码目录 / 本地代码目录**：`obs://<桶>/code-dir/` 挂到
+  `/home/ma-user/modelarts/user-job-dir`（容器内多出 `code-dir/` 一层）；
+- **启动命令**：单条 `bash <绝对路径>/run_train.sh --beta=0.2 … --seed=42`
+  结尾，没有 `bash -c` 包裹、没有 `&&`；
+- **环境变量**：恰好 `MODEL_PATH` / `DATASET` / `OBS_MODEL_OUTPUT` 三个——
+  `OBS_MODEL_OUTPUT` 就是控制台勾选「存储训练产物」注入的那个值；
+- **资源规格**：`modelarts.vm.cpu.2u` × 1。
+
 ### 原理区
 
 - **MA_CODE_DIR 是什么**：平台自动注入的环境变量（值 = 代码目录挂载点），官方文档
