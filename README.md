@@ -745,11 +745,11 @@ MSYS_NO_PATHCONV=1 docker run --rm --entrypoint /app/llama-cli \
 **同日云端对照**（API 建作业 `dpo-run-002-api`，规格 cpu.2u）：全程 4176 秒（本地约快
 4 倍）；数据指纹同上、五形态同样 0% → 100%；MoXing 自传 14 个对象落
 `obs://<桶>/outputs/dpo-run/<run_id>/`（该轮 run_id=`20260902-103641-6bae0b8`，
-OBS 目录名即用它）。本地与云端两条验证链在同一代码版本（6bae0b8）
+OBS 目录名即用它）。本地与云端两条验证链在同一代码版本（6bae0b8，历史哈希，对应重写前 commit）
 下结论一致。
 
 > **2026-09-03 全链路审计复跑**（AI 自动验证，产物与日志见 `tests/ai-verify/`）：
-> 在 683595a 上删旧重做全部阶段——数据集 MD5 逐字节复现（`f28f3824…`）；
+> 在 d53e1e8 上删旧重做全部阶段——数据集 MD5 逐字节复现（`f28f3824…`）；
 > 本地 849s、云端作业 `dpo-run-audit-api` 3772s（run_id `20260902-153844`），
 > 双侧五形态 0%→100%、指纹一致、chat 与 llama.cpp 引擎均答 Huang。
 > 该轮同时实证修订了本版三处内容：`hf download` 命令（issue 001/002）、
